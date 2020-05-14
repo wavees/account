@@ -18,9 +18,9 @@
   </div>
 
   <div class="flex items-center text-sm text-dark">
-    <a href="https://{$general.url}/#projects" class="mx-2">{$_("landing.header.projects")}</a>
-    <a href="https://{$general.url}/#about" class="mx-2">{$_("landing.header.about")}</a>
-    <a href="https://{$general.url}/" class="mx-2">{$_("landing.header.contact")}</a>
+    <a href="https://{$general.url}/" class="mx-2">{$_("landing.header.projects", { default: "Projects" })}</a>
+    <!-- <a href="https://{$general.url}/" class="mx-2">{$_("landing.header.about", { default: "About" })}</a> -->
+    <a href="https://company.{$general.url}/" class="mx-2">{$_("landing.header.contact", { default: "Contact" })}</a>
   </div>
 
 </div>
