@@ -1,7 +1,7 @@
 {
-  "name": "sapper-sliders",
-  "description": "sapper-sliders",
-  "version": "0.0.1",
+  "name": "account",
+  "description": "Wavees Account service",
+  "version": "1.0.0",
   "scripts": {
     "dev": "sapper dev",
     "build": "sapper build --legacy",
