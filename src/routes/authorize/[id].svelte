@@ -20,6 +20,7 @@
   import EmailScreen from "../../components/Screens/login/email.svelte";
   import PincodeScreen from "../../components/Screens/login/pincode.svelte";
   import RegisterScreen from "../../components/Screens/login/register.svelte";
+  import DisclaimerScreen from "../../components/Screens/login/disclaimer.svelte";
 
   // Cookies
   const cookies = Cookie();
@@ -54,7 +55,6 @@
           // Let's check if we need to instantly
           // send user to application or should
           // we show user disclaimer;
-          console.log($callback.url);
           axios.get(`${$api.url}/accounts/${$user.current.token}/applications/${$callback.url.replace('http://','').replace('https://','').split(/[/?#]/)[0]}`)
           .then((response) => {
             let data = response.data;
@@ -204,6 +204,24 @@
       console.log("ERROR");
       console.log(error);
     });
+  };
+
+  // redirect 
+  // Fired when user presses the "I agree" button
+  // on redirect screen. It'll get new user token
+  // and then redirect user to application.
+  function redirect() {
+    loading = true;
+
+    axios.get(`${$api.url}/callback/finish/${id}/${$user.current.token}`)
+    .then((response) => {
+      let data = response.data;
+
+      window.location.href = `http://${$callback.url}/?token=${data.token}`;
+    }).catch((error) => {
+      console.log("error");
+      console.log(error);
+    })
   }
 
   // Should we show loading screen or not?
@@ -275,6 +293,10 @@
           register();
         }} on:loading={(e) => {
           loading = e.detail;
+        }} />
+      { :else if step == 5 }
+        <DisclaimerScreen on:succeed={(e) => {
+          redirect();
         }} />
       { /if }
     </div>
