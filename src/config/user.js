@@ -2,7 +2,7 @@
 import { writable } from "svelte/store";
 import axios from "axios";
 
-import { api } from "./global.js";
+const api = "https://api.wavees.co.vu"
 
 // 
 // func createUserStore()
@@ -43,7 +43,7 @@ function createUserStore() {
       // Let's check for type of this token..
       // 
       // TYPES: session, user token
-      axios.get(`https://api.wavees.co.vu/user/${token}`)
+      axios.get(`${api}/user/${token}`)
       .then((response) => {
         let data = response.data;
 
@@ -63,7 +63,7 @@ function createUserStore() {
         }
       }).catch((error) => {
         // Let's check for session token...
-        axios.get(`https://api.wavees.co.vu/accounts/${token}`)
+        axios.get(`${api}/accounts/${token}`)
         .then((response) => {
           let session = response.data;
 
@@ -88,7 +88,7 @@ function createUserStore() {
                 return object;
               });
             } else {
-              axios.get(`https://api.wavees.co.vu/user/${current.token}`)
+              axios.get(`${api}/user/${current.token}`)
               .then((response) => {
                 let data = response.data;
 
@@ -118,7 +118,7 @@ function createUserStore() {
               })
               .catch((error) => {
                 update((object) => {
-                  object.loaded = false;
+                  object.loaded = null;
                   object.error = error;
 
                   return object;
@@ -129,7 +129,7 @@ function createUserStore() {
         })
         .catch((error) => {
           update((object) => {
-            object.loaded = false;
+            object.loaded = null;
             object.error = error;
 
             return object;
@@ -146,8 +146,62 @@ function createUserStore() {
 
         return object;
       });
+    },
+
+    // loadProfiles
+    // Load profiles (their avatars, emails and so on) to
+    // local storage.
+    loadProfiles: (tokens) => {
+      tokens.forEach((token) => {
+        loadProfile(token);
+      });
+    },
+
+    addProfile: (data) => {
+      update((object) => {
+        object.profiles.push(data);
+
+        return object;
+      });
     }
+
+    // setCurrent
+    // Set current token. This function will check
+    // for token usability and then it'll set it
+    // as current token.
+
+    // Don't need it anymore.
   }
 };
 
-export const user = createUserStore();
+const user = createUserStore();
+
+async function loadProfile(token) {
+  axios.get(`${api}/user/${token}`)
+  .then((response) => {
+    let data = response.data;
+
+    if (data.error == null) {
+      let account = {
+        id: data._id,
+
+        email: data.email,
+        username: data.username,
+
+        avatar: data.avatar,
+        token: token
+      };
+
+      user.addProfile(account);
+    };
+  }).catch((error) => {
+    console.log(error);
+    console.log(error.data);
+
+    if (error.data.error != "UserNotFound") {
+      loadProfile(token);
+    }
+  });
+};
+
+export { user };

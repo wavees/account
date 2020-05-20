@@ -36,9 +36,6 @@ function createCallbackStore() {
         });
       })
       .catch((error) => {
-        console.log("error:");
-        console.log(error);
-
         update((object) => {
           object.loaded = false;
           object.error = error;

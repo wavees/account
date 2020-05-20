@@ -21,6 +21,7 @@
   import PincodeScreen from "../../components/Screens/login/pincode.svelte";
   import RegisterScreen from "../../components/Screens/login/register.svelte";
   import DisclaimerScreen from "../../components/Screens/login/disclaimer.svelte";
+  import ChooserScreen from "../../components/Screens/login/chooser.svelte";
 
   // Cookies
   const cookies = Cookie();
@@ -46,48 +47,49 @@
   // (Yeah, logic)
   function defineStep(type) {
     loading = true;
+
     if (type == "startup") {
-      // Check if user is logged in. (Check for token);
-      if ($user.current.token != null) {
-        // Let's check if user have another accounts
-        if ($user.tokens.length >= 1) {
-          step = 4;
-          loading = false;
-        } else {
-          // Let's check if we need to instantly
-          // send user to application or should
-          // we show user disclaimer;
-          axios.get(`${$api.url}/accounts/${$user.current.token}/applications/${$callback.url.replace('http://','').replace('https://','').split(/[/?#]/)[0]}`)
-          .then((response) => {
-            let data = response.data;
+      // Check if user have another accounts in current session
+      if ($user.tokens.length > 1) {
+        // User have more than one account in this session,
+        // so let's show him account chooser screen. (dumb name, I know)
+        user.loadProfiles($user.tokens);
 
-            if (data.agreed) {
-              // Let's get new user's token and then redirect
-              // user to callback page...
-              axios.get(`${$api.url}/callback/finish/${id}/${$user.current.token}`)
-              .then((response) => {
-                let data = response.data;
+        step = 4;
+        loading = false;
+      } else {
+        // Check if user is logged in. (Check for token);
+        if ($user.current.token != null) {
+          // Let's check if user have another accounts
+          if ($user.tokens.length >= 1) {
+            step = 4;
+            loading = false;
+          } else {
+            // Let's check if we need to instantly
+            // send user to application or should
+            // we show user disclaimer;
+            axios.get(`${$api.url}/accounts/${$user.current.token}/applications/${$callback.url.replace('http://','').replace('https://','').split(/[/?#]/)[0]}`)
+            .then((response) => {
+              let data = response.data;
 
-                window.location.href = `http://${$callback.url}/?token=${data.token}`;
-              })
-            } else {
+              if (data.agreed) {
+                // Let's get new user's token and then redirect
+                // user to callback page...
+                axios.get(`${$api.url}/callback/finish/${id}/${$user.current.token}`)
+                .then((response) => {
+                  let data = response.data;
+
+                  window.location.href = `http://${$callback.url}/?token=${data.token}`;
+                })
+              } else {
+                step = 5;
+                loading = false;
+              }
+            }).catch((error) => {
               step = 5;
               loading = false;
-            }
-          }).catch((error) => {
-            step = 5;
-            loading = false;
-          })
-        }
-      } else {
-        // Check if user have different
-        // accounts in this session.
-
-        if ($user.error == "ChooseAccount") {
-          user.loadProfiles();
-
-          step = 4;
-          loading = false;
+            })
+          }
         } else {
           // Check for user email;
           if (cookies.get('login-email') != null) {
@@ -363,6 +365,10 @@
         }} on:loading={(e) => {
           loading = e.detail;
         }} />
+      { :else if step == 4 }
+        <ChooserScreen on:succeed={(e) => {
+          defineStep({ type: "login", data: e.detail });
+        }}></ChooserScreen>
       { :else if step == 5 }
         <DisclaimerScreen on:succeed={(e) => {
           redirect(cookies.get('token'));
