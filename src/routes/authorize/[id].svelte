@@ -45,12 +45,14 @@
   // Function that will define step.
   // (Yeah, logic)
   function defineStep(type) {
+    loading = true;
     if (type == "startup") {
       // Check if user is logged in. (Check for token);
       if ($user.current.token != null) {
         // Let's check if user have another accounts
         if ($user.tokens.length >= 1) {
           step = 4;
+          loading = false;
         } else {
           // Let's check if we need to instantly
           // send user to application or should
@@ -70,9 +72,11 @@
               })
             } else {
               step = 5;
+              loading = false;
             }
           }).catch((error) => {
             step = 5;
+            loading = false;
           })
         }
       } else {
@@ -83,6 +87,7 @@
           user.loadProfiles();
 
           step = 4;
+          loading = false;
         } else {
           // Check for user email;
           if (cookies.get('login-email') != null) {
@@ -98,12 +103,15 @@
               // "pincode" page.
 
               step = 2;
+              loading = false;
             })
             .catch((error) => {    
               step = 1;
+              loading = false;
             });
           } else {
             step = 1;
+            loading = false;
           };
         }
       }
@@ -116,24 +124,39 @@
         // show him pincode screen;
         if (data.userExists == true) {
           step = 2;
+          loading = false;
         // User doesn't exist:
         // show him register screen;
         } else {
           step = 3;
+          loading = false;
         }
       } else if (type.type == "login") {
         // Let's check if we need to redirect user
         // instantly or we need to show Redirect Screen.
-        
+        axios.get(`${$api.url}/accounts/${type.data.token}/applications/${$callback.url.replace('http://','').replace('https://','').split(/[/?#]/)[0]}`)
+        .then((response) => {
+          let data = response.data;
+          
+          if (data.agreed) {
+            redirect(type.data.token);
+          } else {
+            step = 5;
+            loading = false;
+          }
+        }).catch((error) => {
+          console.log("ERROR 5");
+          console.log(error);
+        })
       } else if (type.type == "register") {
         // Let's redirect user to pincode page.
         // User need to write his pincode to
         // continue;
-        
+        step = 2;
+        loading = false;
       };
 
       // Hide loading screen;
-      loading = false;
     }
   };
 
@@ -168,9 +191,9 @@
         loading = false;
         // Let's define user's next step
         defineStep({ type: "register", data: data });
-      
       };
     }).catch((error) => {
+      console.log("ERROR 6")
       console.log(error);
     })
   };
@@ -190,18 +213,20 @@
       if (data.token != null) {
         // Procceed to login...
         loading = false;
+        user.setToken(data.token);
+
         // Let's define users's next step...
         defineStep({ type: "login", data: data });
 
         cookies.set("token", data.token, {
           path: "/",
-          domain: "wavees.co.vu",
+          // domain: "wavees.co.vu",
           expires: moment().add("1", "y").toDate()
          });
-        cookies.remove("login-email")
+        cookies.remove("login-email");
       }
     }).catch((error) => {
-      console.log("ERROR");
+      console.log("ERROR 2");
       console.log(error);
     });
   };
@@ -210,16 +235,16 @@
   // Fired when user presses the "I agree" button
   // on redirect screen. It'll get new user token
   // and then redirect user to application.
-  function redirect() {
+  function redirect(token) {
     loading = true;
 
-    axios.get(`${$api.url}/callback/finish/${id}/${$user.current.token}`)
+    axios.get(`${$api.url}/callback/finish/${id}/${token}`)
     .then((response) => {
       let data = response.data;
 
       window.location.href = `http://${$callback.url}/?token=${data.token}`;
     }).catch((error) => {
-      console.log("error");
+      console.log("error 3");
       console.log(error);
     })
   }
@@ -243,7 +268,7 @@
   <!-- 
     @section container
    -->
-  <div class="rounded-lg bg-white relative w-full md:max-w-md shadow-xl">
+  <div class="rounded-lg bg-white relative mx-4 md:mx-0 w-full md:max-w-md shadow-xl">
     { #if !$callback.loaded || loading }
       <div style="z-index: 2;" class="w-full h-full absolute flex justify-center items-center bg-white">
         <Spinner size="30" />
@@ -251,10 +276,54 @@
     { /if }
 
     <!-- 
+      Header
+     -->
+    <div class="w-full py-4 flex justify-around items-center bg-gray-100">
+      <!-- 1: email
+        IDS: 1 -->
+      <div class="flex items-center {step == 1 ? "font-semibold" : ""}">
+        <div style="width: 1.8em; height: 1.8em;" class="flex justify-center text-center items-center text-sm rounded-full {step == 1 ? "bg-blue-600 text-white" : "bg-gray-300"}">
+          { #if step > 1 }
+            <div>
+              <img style="width: 1.3em; height: 1.3em;" src="./icons/check.svg" alt="Checkmark">
+            </div>
+          { :else }
+            1.
+          { /if }
+        </div>
+        <p class="mx-2 text-xs">Ввод почты</p>
+      </div>
+
+      <!-- 2: pincode vs register
+        IDS: 2,3 -->
+      <div class="flex items-center {step == 2 || step == 3 || step == 4 ? "font-semibold" : ""}">
+        <div style="width: 1.8em; height: 1.8em;" class="flex justify-center text-center items-center text-sm rounded-full {step == 2 || step == 3 || step == 4 ? "bg-blue-600 text-white" : "bg-gray-300"}">
+          { #if step > 4 }
+            <div>
+              <img style="width: 1.3em; height: 1.3em;" src="./icons/check.svg" alt="Checkmark">
+            </div>
+          { :else }
+            2.
+          { /if }
+        </div>
+        <p class="mx-2 text-xs">{ step == 4 ? "Выбор аккаунта" : step == 3 ? "Регистрация" : "Авторизация" }</p>
+      </div>
+
+      <!-- 3: redirect
+        IDS:  -->
+      <div class="flex items-center {step == 5 ? "font-semibold" : ""}">
+        <div style="width: 1.8em; height: 1.8em;" class="flex justify-center text-center items-center text-sm rounded-full {step == 5 ? "bg-blue-600 text-white" : "bg-gray-300"}">
+          3.
+        </div>
+        <p class="mx-2 text-xs">Последний штрих!</p>
+      </div>
+    </div>
+
+    <!-- 
       Different screens
      -->
     <div class="w-full h-full px-4 py-6">
-      
+
       { #if step == 0 }
         <div class="text-center">
           <h1 class="text-xl">We're trying to identify you.</h1>
@@ -275,7 +344,7 @@
           defineStep({ type: "emailChanged", data: e.detail });
         }} />
       { :else if step == 2 } 
-        <PincodeScreen on:changeStep={(e) => {
+        <PincodeScreen email={tmpUser.email} on:changeStep={(e) => {
           step = e.detail;
         }} on:succeed={(e) => {
           tmpUser.pincode = e.detail.pincode;
@@ -296,7 +365,7 @@
         }} />
       { :else if step == 5 }
         <DisclaimerScreen on:succeed={(e) => {
-          redirect();
+          redirect(cookies.get('token'));
         }} />
       { /if }
     </div>

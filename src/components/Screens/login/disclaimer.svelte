@@ -4,6 +4,8 @@
   import { callback } from "../../../config/callback.js";
 
   // Importing components
+  import RoundedButton from "../../BUttons/RoundedButton.svelte";
+  import TransparentButton from "../../BUttons/TransparentButton.svelte";
 
   // New event dispatcher
   const dispatch = createEventDispatcher();
@@ -16,39 +18,48 @@
 </script>
 
 <div class="mt-4 items-center text-center">
-  <div>
-    This site <a href="{$callback.url}" style="text-decoration: none; color: #FF9800; border-bottom: 1px dotted #FF5722">({$callback.url})</a> will have these permissions:
+  <div class="mb-6">
+    <h1 class="text-semibold text-xl">Подтверждение на переадресацию</h1>
+    <p class="text-sm">Этот сайт <a href="{$callback.url}" style="text-decoration: none; color: #4299e1; border-bottom: 1px dotted #4299e1">({$callback.url})</a> будет иметь данные права:</p>
+  </div>
 
+  <div>
     <!-- Permissions container -->
     <div class="w-full justify-start">
       <div class="flex my-2">
         <img src="icons/check.svg" alt="Agree">
-        <p class="mx-4">See your Email</p>
+        <p class="mx-4">Видеть вашу почту</p>
       </div>
 
       <div class="flex my-2">
         <img src="icons/check.svg" alt="Agree">
-        <p class="mx-4">See your Avatar</p>
+        <p class="mx-4">Видеть ваш Аватар</p>
       </div>
 
       <div class="flex my-2">
         <img src="icons/check.svg" alt="Agree">
-        <p class="mx-4">Modify Application's storage</p>
+        <p class="mx-4">Готовить вкусные пироги 🥧</p>
       </div>
     </div>
   </div>
 
-  <button on:click={(e) => {
-    verify();
-  }} class="my-4 bg-transparent hover:bg-blue-500 hover:text-white text-dark font-semibold hover:text-white py-2 px-4 border border-dashed hover:border-transparent rounded">
-    I agree
-  </button>
+  <div class="mt-6 w-full flex justify-around">
+    <RoundedButton on:click={(e) => verify()}>
+      Я согласен 👌
+    </RoundedButton>
+  </div>
 
   <div class="mt-4 w-full flex justify-between">
-    <p class="text-dark mx-4" style="cursor: pointer;">Use different account</p>
-
-    <p class="mx-4 text-dark" style="cursor: pointer;">
-      Go home
-    </p>
+    <TransparentButton classes="text-sm">
+      Другой аккаунт
+    </TransparentButton>
+ 
+    <TransparentButton classes="text-sm">
+      Вернуться домой
+    </TransparentButton>
+  </div>
+  
+  <div class="mt-6 text-xs px-4 md:px-6">
+    Вы всегда можете отключить данное приложение от вашего аккаунта на страничке с настройками аккаунта.
   </div>
 </div>

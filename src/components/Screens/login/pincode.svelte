@@ -1,9 +1,14 @@
 <script>
   // import
   import { createEventDispatcher } from "svelte";
+  import { onMount } from "svelte";
+
+  import axios from "axios";
+  import { api } from "../../../config/global.js";
 
   // Importing components
-
+  import RoundedButton from "../../Buttons/RoundedButton.svelte";
+  import TransparentButton from "../../Buttons/TransparentButton.svelte";
 
   // Event dispatcher
   const dispatch = createEventDispatcher();
@@ -25,9 +30,7 @@
     };
 
     pincode = pincode.join("");
-    console.log(pincode);
 
-    console.log(pincode.split("").length);
     // Checking pincode size;
     if (pincode.split("").length < 4) {
       error = 1;
@@ -35,7 +38,25 @@
       // Let's login our user!
       dispatch("succeed", { pincode: pincode });
     }
-  }
+  };
+
+  // Let's get avatar from email string.
+  onMount(() => {
+    axios.get(`${$api.url}/user/check/${email}`)
+    .then((response) => {
+      let data = response.data;
+      console.log(data);
+
+      if (data.avatar != null) {
+        avatar = data.avatar;
+      };
+    })
+  });
+
+  let avatar = null;
+
+  // Email string
+  export let email = "undefined email";
 </script>
 
 <style>
@@ -54,6 +75,14 @@
 </style>
 
 <div class="items-center text-center">
+  <div class="mb-6 flex flex-col justify-center items-center">
+    <div class="rounded-full" style="background-image: url({avatar == null ? "https://cdn.dribbble.com/users/45488/screenshots/9084073/media/f889543c2e901048f8da2d9915d0bf37.jpg" : avatar}); background-size: cover; background-position: center center; width: 6em; height: 6em;" alt="Avatar"></div>
+    <div class="mt-2">
+      <p class="font-semibold text-xl">Введите пинкод от аккаунта:</p>
+      <p class="text-sm text-semibold">{email}</p>
+    </div>
+  </div>
+
   <div class="items-center text-center">
     <input type="text" class="m-2 pincode">
     <input type="text" class="m-2 pincode">
@@ -61,17 +90,17 @@
     <input type="text" class="m-2 pincode">
   </div>
 
-  <button on:click={(e) => {
-    verify();
-  }} class="my-4 w-full bg-transparent hover:bg-gray-900 text-dark font-semibold hover:text-white py-2 px-4 border border-dashed hover:border-transparent rounded">
-    Login
-  </button>
+  <RoundedButton classes="mt-4" on:click={(e) => verify()}>
+    Войти 🔑
+  </RoundedButton>
 
-  <div class="w-full flex justify-between">
-    <p class="text-dark" style="cursor: pointer;">Use different account</p>
+  <div class="w-full mt-4 flex justify-between">
+    <TransparentButton classes="text-sm" on:click={(e) => {}}>
+      Другой аккаунт
+    </TransparentButton>
 
-    <p class="text-dark" style="cursor: pointer;">
-      Forgot pincode?
-    </p>
+    <TransparentButton classes="text-sm" on:click={(e) =>{}}>
+      Забыли пинкод?
+    </TransparentButton>
   </div>
 </div>

@@ -90,21 +90,26 @@
 </script>
 
 <div class="items-center text-center">
+  <div class="mb-6">
+    <h1 class="text-semibold text-xl">Для продолжения</h1>
+    <p>введите Вашу почту</p>
+  </div>
+
   <input bind:value={email} id="email" class="appearance-none w-full py-2 px-3 border border-dashed" type="text" placeholder="email">
   
   <div class="my-6 flex w-full justify-center items-center">
     <TransparentButton classes="mx-2">
-      Home
+      Назад
     </TransparentButton>
 
     <RoundedButton on:click={(e) => {
       verify();
     }} classes="mx-2">
-      Continue 🚪
+      Продолжить 🚪
     </RoundedButton>
   </div>
 
   <div class="w-full text-center text-sm">
-    <p>By continuing, you agreeing to the User Agreement.</p>
+    <p>Продолжая, вы соглашаетесь с Пользовательским Соглашением.</p>
   </div>
 </div>
