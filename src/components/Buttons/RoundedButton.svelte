@@ -8,7 +8,7 @@
   // 
 
   // Export some button configurations and variables
-  export let backgroundColor;
+  // export let backgroundColor;
 
   export let classes = "";
 </script>

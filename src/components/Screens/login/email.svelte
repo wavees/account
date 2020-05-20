@@ -3,6 +3,7 @@
   import { createEventDispatcher } from "svelte";
   import validateEmail from "../../../helpers/validateEmail.js";
 
+  import { onMount } from "svelte";
   import axios from "axios";
   import Cookie from "cookie-universal";
 
@@ -85,6 +86,12 @@
 
   let error = null;
 
+  // It's very bad code, isn't it?
+  onMount(() => {
+    let focusElement = document.getElementById("email");
+    focusElement.focus();
+  });
+
   // Some variables;
   export let email = null;
 </script>
@@ -95,7 +102,12 @@
     <p>введите Вашу почту</p>
   </div>
 
-  <input bind:value={email} id="email" class="appearance-none w-full py-2 px-3 border border-dashed" type="text" placeholder="email">
+  <input on:keyup={(e) => {
+    if (e.keyCode === 13) {
+      e.preventDefault();
+      verify();
+    };
+  }} bind:value={email} id="email" class="focus appearance-none w-full py-2 px-3 border border-dashed" type="text" placeholder="email">
   
   <div class="my-6 flex w-full justify-center items-center">
     <TransparentButton classes="mx-2">

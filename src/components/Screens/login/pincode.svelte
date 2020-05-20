@@ -42,6 +42,9 @@
 
   // Let's get avatar from email string.
   onMount(() => {
+    let focusElement = document.getElementById("pincode-start");
+    focusElement.focus();
+
     axios.get(`${$api.url}/user/check/${email}`)
     .then((response) => {
       let data = response.data;
@@ -52,6 +55,13 @@
       };
     })
   });
+
+  function keyup(e) {
+    if (e.keyCode === 13) {
+      e.preventDefault();
+      verify();
+    }
+  };
 
   let avatar = null;
 
@@ -84,10 +94,10 @@
   </div>
 
   <div class="items-center text-center">
-    <input type="text" class="m-2 pincode">
-    <input type="text" class="m-2 pincode">
-    <input type="text" class="m-2 pincode">
-    <input type="text" class="m-2 pincode">
+    <input id="pincode-start" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+    <input type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+    <input type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+    <input type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
   </div>
 
   <RoundedButton classes="mt-4" on:click={(e) => verify()}>
