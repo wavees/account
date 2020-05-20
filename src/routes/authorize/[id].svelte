@@ -220,7 +220,7 @@
 
         cookies.set("token", data.token, {
           path: "/",
-          // domain: "wavees.co.vu",
+          domain: "wavees.co.vu",
           expires: moment().add("1", "y").toDate()
          });
         cookies.remove("login-email");
