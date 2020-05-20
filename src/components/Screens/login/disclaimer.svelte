@@ -4,8 +4,8 @@
   import { callback } from "../../../config/callback.js";
 
   // Importing components
-  import RoundedButton from "../../BUttons/RoundedButton.svelte";
-  import TransparentButton from "../../BUttons/TransparentButton.svelte";
+  import RoundedButton from "../../Buttons/RoundedButton.svelte";
+  import TransparentButton from "../../Buttons/TransparentButton.svelte";
 
   // New event dispatcher
   const dispatch = createEventDispatcher();
