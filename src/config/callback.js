@@ -43,6 +43,15 @@ function createCallbackStore() {
           return object
         });
       })
+    },
+
+    // setLoaded
+    setLoaded: (state) => {
+      update((object) => {
+        object.loaded = state;
+
+        return object;
+      });
     }
   }
 };

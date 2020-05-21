@@ -6,20 +6,6 @@
   import Spinner from "../../components/Spinner.svelte";
   import RoundedButton from "../../components/Buttons/RoundedButton.svelte";
   import TransparentButton from "../../components/Buttons/TransparentButton.svelte"
-
-  import Cookie from "cookie-universal";
-
-  // Cookies instance
-  const cookies = Cookie();
-
-  // Let's get user token and then
-  // let's do something very interesting...
-  const token = cookies.get('token');
-  if (token != null) {
-    user.setToken(token);
-  } else {
-    user.setLoaded(true);
-  }
 </script>
 
 <div style="width: 100%; height: 100vh; z-index: 1">

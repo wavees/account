@@ -1,5 +1,6 @@
 <script>
   // import
+  import { goto } from "@sapper/app";
   import { stores } from "@sapper/app";
   import { onMount } from "svelte";
 
@@ -31,7 +32,12 @@
   const { id } = $page.params;
 
   // Login process step.
-  
+    
+  // Should we show loading screen or not?
+  let loading = false;
+  let currentToken = null;
+  let error = null;
+
   // Values:
   // 0 - null
   // 1 - Email validation
@@ -68,6 +74,8 @@
             // Let's check if we need to instantly
             // send user to application or should
             // we show user disclaimer;
+            if (id == "add") return;
+
             axios.get(`${$api.url}/accounts/${$user.current.token}/applications/${$callback.url.replace('http://','').replace('https://','').split(/[/?#]/)[0]}`)
             .then((response) => {
               let data = response.data;
@@ -75,12 +83,7 @@
               if (data.agreed) {
                 // Let's get new user's token and then redirect
                 // user to callback page...
-                axios.get(`${$api.url}/callback/finish/${id}/${$user.current.token}`)
-                .then((response) => {
-                  let data = response.data;
-
-                  window.location.href = `http://${$callback.url}/?token=${data.token}`;
-                })
+                redirect($user.current.token);
               } else {
                 step = 5;
                 loading = false;
@@ -136,6 +139,8 @@
       } else if (type.type == "login") {
         // Let's check if we need to redirect user
         // instantly or we need to show Redirect Screen.
+        currentToken = type.data.token;
+
         axios.get(`${$api.url}/accounts/${type.data.token}/applications/${$callback.url.replace('http://','').replace('https://','').split(/[/?#]/)[0]}`)
         .then((response) => {
           let data = response.data;
@@ -147,8 +152,8 @@
             loading = false;
           }
         }).catch((error) => {
-          console.log("ERROR 5");
-          console.log(error);
+          step = 5;
+          loading = false;
         })
       } else if (type.type == "register") {
         // Let's redirect user to pincode page.
@@ -163,8 +168,8 @@
   };
 
   callback.subscribe((value) => {
-    if (value.url != null) { 
-      defineStep("startup") 
+    if (value.url != null || id == "add") { 
+      defineStep("startup");
     }});
 
   // User object (Saves temporary user data (Applies in registration step))
@@ -213,19 +218,103 @@
       let data = response.data;
 
       if (data.token != null) {
-        // Procceed to login...
-        loading = false;
-        user.setToken(data.token);
+        // Let's check if user want to add another account
+        // to this session or if he want to login.
 
-        // Let's define users's next step...
-        defineStep({ type: "login", data: data });
+        if (id == "add") {
+          // Let's check if current token is session token
+          // or if it's an user token.
+          let token = cookies.get('token');
 
-        cookies.set("token", data.token, {
-          path: "/",
-          domain: "wavees.co.vu",
-          expires: moment().add("1", "y").toDate()
-         });
-        cookies.remove("login-email");
+          if (token != null) {
+            // Checking
+            axios.get(`${$api.url}/accounts/${token}`)
+            .then((response) => {
+              // It's a session token, so let's just add new
+              // profile to this session.
+              axios.put(`${$api.url}/accounts/${token}`, { token: data.token })
+              .then((response) => {
+                let data = response.data;
+
+                // Check if we need to return user to
+                // some callback
+
+                if ($page.query.return != null) {
+                  window.location.href = `/${$page.query.return}`;
+                } else {
+                  window.location.href = "/";
+                }
+              }).catch((error) => {
+                console.log('erro 312');
+                console.log(error);
+              });
+            }).catch((error) => {
+              // It's an user token, so let's create new session
+              let query = {
+                profiles: [
+                  token,
+                  data.token
+                ]
+              };
+              
+              axios.post(`${$api.url}/accounts`, query)
+              .then((response) => {
+                let data = response.data;
+
+                // Check if we need to return user to
+                // some callback
+                
+                if ($page.query.return != null) {
+                  window.location.href = `/${$page.query.return}`;
+                } else {
+                  window.location.href = "/";
+                }
+
+                if (data.token != null) {
+                  cookies.set("token", data.token, {
+                    path: "/",
+                    // domain: "wavees.co.vu",
+                    expires: moment().add("1", "y").toDate()
+                  });
+
+                  cookies.remove('login-email');
+                };
+              }).catch((error) => {
+                console.log('erro 3123');
+                console.log(error);
+              });
+            });
+          } else {
+            // Procceed to login...
+            loading = false;
+            user.setToken(data.token);
+
+            // Let's define users's next step...
+            defineStep({ type: "login", data: data });
+
+            cookies.set("token", data.token, {
+              path: "/",
+              // domain: "wavees.co.vu",
+              expires: moment().add("1", "y").toDate()
+            });
+            cookies.remove("login-email");
+          }
+          // axios.put(`${$api.url}/accounts/${cookie}`)
+        } else {
+          // Procceed to login...
+          loading = false;
+          user.setToken(data.token);
+
+          // Let's define users's next step...
+          defineStep({ type: "login", data: data });
+
+          cookies.set("token", data.token, {
+            path: "/",
+            // domain: "wavees.co.vu",
+            expires: moment().add("1", "y").toDate()
+          });
+          cookies.remove("login-email");
+        }
       }
     }).catch((error) => {
       console.log("ERROR 2");
@@ -247,21 +336,21 @@
       window.location.href = `http://${$callback.url}/?token=${data.token}`;
     }).catch((error) => {
       console.log("error 3");
-      console.log(error);
+      console.log(error.response.data);
     })
-  }
-
-  // Should we show loading screen or not?
-  let loading = false;
-  
-  let error = null;
+  };
 
   // onMount
   // Function, that is called when our page
   // loads. Here we'll get some information
   // about our callback. 
   onMount(() => {
-    callback.retrieve(id);
+    if (id == "add") {
+      user.clearStore();
+      callback.setLoaded(true);
+    } else {
+      callback.retrieve(id);
+    }
   });
 </script>
 
@@ -371,7 +460,10 @@
         }}></ChooserScreen>
       { :else if step == 5 }
         <DisclaimerScreen on:succeed={(e) => {
-          redirect(cookies.get('token'));
+          if (currentToken == null) {
+            currentToken = cookies.get("token");
+          };
+          redirect(currentToken);
         }} />
       { /if }
     </div>

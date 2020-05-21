@@ -12,7 +12,7 @@ const api = "https://api.wavees.co.vu"
 // 
 function createUserStore() {
   // Default object for the store
-  let object = {
+  let store = {
     loaded: false,
     error: null,
 
@@ -29,12 +29,27 @@ function createUserStore() {
   };
 
   // Get some functions from writable store...
-  const { subscribe, set, update } = writable(object);
+  const { subscribe, set, update } = writable(store);
 
   // Return subscribe function and some other
   // functions to manipulate this store.
   return {
     subscribe,
+
+    // clearStore
+    // Clears this store
+    clearStore: () => {
+      update((object) => {
+        object.current = {
+          token: null
+        };
+
+        object.tokens = [];
+        object.profiles = [];
+      
+        return object;
+      });
+    },
 
     // setToken
     // Set session/user token (We'll get user information
@@ -152,6 +167,11 @@ function createUserStore() {
     // Load profiles (their avatars, emails and so on) to
     // local storage.
     loadProfiles: (tokens) => {
+      update((object) => {
+        object.profiles = [];
+        return object;
+      });
+
       tokens.forEach((token) => {
         loadProfile(token);
       });
@@ -195,10 +215,9 @@ async function loadProfile(token) {
       user.addProfile(account);
     };
   }).catch((error) => {
-    console.log(error);
-    console.log(error.data);
+    let data = error.response.data;
 
-    if (error.data.error != "UserNotFound") {
+    if (data.error != "UserNotFound") {
       loadProfile(token);
     }
   });
