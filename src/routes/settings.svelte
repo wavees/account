@@ -36,7 +36,7 @@
     if ($user.current.token != null) {
       // User have only one account
       user.loadProfiles([$user.current.token]);
-      current = [$user.current];
+      currentProfile = [$user.current];
     } else {
       // User needs to be logged in.
       goto('/');
