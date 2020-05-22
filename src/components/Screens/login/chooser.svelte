@@ -8,6 +8,7 @@
   
   // Importing components
   import Spinner from "../../Spinner.svelte";
+  import Avatar from "../../Avatar.svelte";
 
   const { page } = stores();
   const { id } = $page.params;
@@ -37,8 +38,8 @@
         verify(profile.token);
       }} style="cursor: pointer" class="my-4 hover:bg-gray-200 bg-white w-full flex justify-start py-4 px-4 md:px-8 rounded-lg">
         <div class="flex">
-          <div class="rounded-full" style="background-image: url({profile.avatar == null ? "https://cdn.dribbble.com/users/45488/screenshots/9084073/media/f889543c2e901048f8da2d9915d0bf37.jpg" : profile.avatar}); background-size: cover; background-position: center center; width: 3em; height: 3em;" alt="Avatar"></div>
-          
+          <Avatar avatar={profile.avatar} username={profile.username} />
+
           <div class="ml-4">
             <h1 class="text-semibold text-xl">{profile.username}</h1>
             <p class="text-sm">{profile.email}</p>

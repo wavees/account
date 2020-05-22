@@ -9,6 +9,7 @@
   // Importing components
   import RoundedButton from "../../Buttons/RoundedButton.svelte";
   import TransparentButton from "../../Buttons/TransparentButton.svelte";
+  import Avatar from "../../Avatar.svelte";
 
   // Event dispatcher
   const dispatch = createEventDispatcher();
@@ -48,11 +49,14 @@
     axios.get(`${$api.url}/user/check/${email}`)
     .then((response) => {
       let data = response.data;
-      console.log(data);
 
       if (data.avatar != null) {
         avatar = data.avatar;
       };
+
+      if (data.username != null) {
+        username = data.username;
+      }
     })
   });
 
@@ -67,6 +71,7 @@
 
   // Email string
   export let email = "undefined email";
+  let username = email;
 </script>
 
 <style>
@@ -86,7 +91,8 @@
 
 <div class="items-center text-center">
   <div class="mb-6 flex flex-col justify-center items-center">
-    <div class="rounded-full" style="background-image: url({avatar == null ? "https://cdn.dribbble.com/users/45488/screenshots/9084073/media/f889543c2e901048f8da2d9915d0bf37.jpg" : avatar}); background-size: cover; background-position: center center; width: 6em; height: 6em;" alt="Avatar"></div>
+    <Avatar size="4.5" avatar={avatar} username={username} />
+
     <div class="mt-2">
       <p class="font-semibold text-xl">Введите пинкод от аккаунта:</p>
       <p class="text-sm text-semibold">{email}</p>

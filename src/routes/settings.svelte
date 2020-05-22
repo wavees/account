@@ -1,29 +1,40 @@
 <script>
   // import
   import { goto } from "@sapper/app";
+  import { stores } from "@sapper/app";
   import { user } from "../config/user.js";
+
+  import { api } from "../config/global.js";
+  import { onMount } from "svelte";
+  import axios from "axios";
 
   // Importing components
   import RoundedButton from "../components/Buttons/RoundedButton.svelte";
   import TransparentButton from "../components/Buttons/TransparentButton.svelte";
   import Spinner from "../components/Spinner.svelte";
+  import Avatar from "../components/Avatar.svelte";
+
+  // Let's get page store...
+  const { page } = stores();
 
   // Variables
   let currentProfile = {
     token: null
   };
   let listEnabled = false;
+  let currentToken = null;
 
   // findProfile
   // This function will get cached account information
-  // using account token.
+  // using account token or profile name.
   function findProfile(token) {
     let profiles = $user.profiles;
     let returnProfile = {};
 
     profiles.forEach((profile) => {
-      if (profile.token == token) {
+      if (profile.token == token || profile.username == token) {
         returnProfile = profile;
+        currentToken = profile.token;
       }
     });
 
@@ -42,6 +53,58 @@
       goto('/');
     };
   };
+
+  // uploadAvatar
+  // 
+  function uploadAvatar(file) {
+    let formData = new FormData();
+    formData.append("avatar", file);
+
+    axios.post(`${$api.url}/user/${currentProfile.token}/avatar`, formData, 
+    {
+      // headers: formData.getHeaders() 
+    })
+    .then((response) => {
+      let data = response.data;
+
+      if (data.state) {
+        user.loadProfiles($user.tokens);
+      } else {
+        console.log('error');
+      };
+    }).catch((error) => {
+      console.log(error);
+      console.log(error.response.data);
+    })
+  };
+
+
+  // Let's check if we need to choose
+  // profile by default or no.
+
+  // Example url to choose profile
+  // with username {username}:
+
+  // https://.../settings?u={username}
+  user.subscribe((object) => {
+    if (object.profiles.length > 1) {
+      if (currentToken != null) {
+        let profile = findProfile(currentToken);
+
+        if (profile) {
+          currentProfile = profile;
+        };
+      } else {
+        if ($page.query.u != null) {
+          let profile = findProfile($page.query.u);
+
+          if (profile) {
+            currentProfile = profile;
+          }
+        }
+      }
+    }
+  });
 </script>
 
 <div style="width: 100%; height: 100vh;" class="bg-gray-100 flex justify-center items-center relative md:px-16 lg:px-32 md:py-8 lg:py-16">
@@ -107,9 +170,9 @@
               if (listEnabled) {
                 listEnabled = false;
               };
-            }} style="cursor: pointer" class="my-4 items-center hover:bg-gray-200 {currentProfile.token == profile.token ? "bg-gray-200 border-solid border-blue-600 border-2" : "bg-white"} w-full flex justify-start py-4 px-4 md:px-8 rounded-lg">
+            }} style="cursor: pointer" class="my-4 items-center hover:bg-gray-200 {currentProfile.token == profile.token ? "bg-gray-200 border-solid border-blue-600 border-2" : "bg-white"} border-solid border-white border-2 w-full flex justify-start py-4 px-4 md:px-8 rounded-lg">
               <div class="flex">
-                <div class="rounded-full" style="background-image: url({profile.avatar == null ? "https://cdn.dribbble.com/users/45488/screenshots/9084073/media/f889543c2e901048f8da2d9915d0bf37.jpg" : profile.avatar}); background-size: cover; background-position: center center; width: 2.3em; height: 2.3em;" alt="Avatar"></div>
+                <Avatar avatar={profile.avatar} username={profile.username} />
                 
                 <div class="ml-4">
                   <h1 class="text-semibold">{profile.username}</h1>
@@ -152,9 +215,16 @@
               <h1 class="text-xl text-semibold w-full text-center">Аватарка профиля</h1>
 
               <div class="flex mt-4">
-                <div class="rounded-full" style="background-image: url({currentProfile.avatar == null ? "https://cdn.dribbble.com/users/45488/screenshots/9084073/media/f889543c2e901048f8da2d9915d0bf37.jpg" : currentProfile.avatar}); background-size: cover; background-position: center center; width: 5.5em; height: 5.5em;" alt="Avatar"></div>
+                <Avatar size="5.5" avatar={currentProfile.avatar} username={currentProfile.username} />
+                
                 <div class="mx-4">
-                  <RoundedButton classes="text-sm">
+                  <input class="hidden" id="avatar" name="avatar" type="file" accept=".png, .jpg, .jpeg" on:change={(e) => {
+                    uploadAvatar(document.getElementById('avatar').files[0]);
+                  }}>
+                  
+                  <RoundedButton on:click={(e) => {
+                    document.getElementById('avatar').click();
+                  }} classes="text-sm">
                     🖼️ Загрузить новую
                   </RoundedButton>
 

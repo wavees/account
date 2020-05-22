@@ -361,7 +361,7 @@
    -->
   <div class="rounded-lg bg-white relative mx-4 md:mx-0 w-full md:max-w-md shadow-xl">
     { #if !$callback.loaded || loading }
-      <div style="z-index: 2;" class="w-full h-full absolute flex justify-center items-center bg-white">
+      <div style="z-index: 3;" class="w-full h-full absolute flex justify-center items-center bg-white">
         <Spinner size="30" />
       </div>
     { /if }
