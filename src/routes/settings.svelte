@@ -8,21 +8,46 @@
   import { onMount } from "svelte";
   import axios from "axios";
 
+  import moment from "moment";
+
   // Importing components
   import RoundedButton from "../components/Buttons/RoundedButton.svelte";
   import TransparentButton from "../components/Buttons/TransparentButton.svelte";
   import Spinner from "../components/Spinner.svelte";
   import Avatar from "../components/Avatar.svelte";
+  import WordAvatar from "../components/WordAvatar.svelte";
+
+  // Icons
+  import Delete from "../components/Icons/Delete.svelte";
+  import ThumbsDown from "../components/Icons/ThumbsDown.svelte";
 
   // Let's get page store...
   const { page } = stores();
 
   // Variables
   let currentProfile = {
-    token: null
+    token: null,
+    approvedApplications: {
+      loading: true,
+      list: []
+    }
   };
   let listEnabled = false;
   let currentToken = null;
+
+  // loadApprovedApplications
+  function loadApprovedApplications(token) {
+    axios.get(`${$api.url}/accounts/${token}/applications`)
+    .then((response) => {
+      currentProfile.approvedApplications.loading = false;
+      currentProfile.approvedApplications.list = response.data;
+    }).catch((error) => {
+      currentProfile.approvedApplications.loading = false;
+
+      console.log('error 1');
+      console.log(error);
+    });
+  };
 
   // findProfile
   // This function will get cached account information
@@ -34,7 +59,14 @@
     profiles.forEach((profile) => {
       if (profile.token == token || profile.username == token) {
         returnProfile = profile;
+        returnProfile.approvedApplications = {
+          list: [],
+          loading: true
+        };
+
         currentToken = profile.token;
+
+        loadApprovedApplications(profile.token);
       }
     });
 
@@ -176,7 +208,7 @@
                 
                 <div class="ml-4">
                   <h1 class="text-semibold">{profile.username}</h1>
-                  <p class="text-xs">{profile.email}</p>
+                  <p class="text-xs text-gray-700">{profile.email}</p>
                 </div>
               </div>
             </div>
@@ -242,6 +274,75 @@
           <div class="w-full md:w-1/2 px-4 my-4 relative">
             <div class="w-full h-full rounded-lg bg-white shadow-2xl px-4 py-6">
               {currentProfile.username}
+            </div>
+          </div>
+
+          <!-- Approved applications -->
+          <div class="w-full px-4 my-4 relative">
+            <div class="w-full h-full rounded-lg bg-white shadow-2xl px-6 py-6">
+              <div class="w-full mb-4 flex justify-center items-center">
+                <div class="text-center">
+                  <h1 class="text-xl text-semibold">Разрешенные приложения</h1>
+                  <p class="text-gray-700 text-sm max-w-md">Этот список показывает те приложения, которые имеют право взаимодействовать с вашим аккаунтом как и когда они захотят.</p>
+                </div>
+                <!-- <p class="text-xs"></p> -->
+              </div>
+
+              { #if currentProfile.approvedApplications.loading }
+                <div class="w-full flex justify-center items-center py-6">
+                  <Spinner size="35" />
+                </div>
+              { :else }
+
+                { #if currentProfile.approvedApplications.list.length <= 0 }
+                  <div class="flex justify-center items-center mt-4">
+                    <div class="max-w-sm text-center">
+                      <h1 class="text-xl text-semibold text-gray-700">Тут пустовато</h1>
+                      <p class="text-sm text-gray-600">это значит что вы ещё никому не давали доступа!</p>
+                    </div>
+                  </div>
+                { :else }
+
+                  {#each currentProfile.approvedApplications.list as application}
+                    <div class="w-full flex justify-between py-4 px-4 rounded-lg hover:bg-gray-200">
+                      <!-- Application name -->
+                      <div class="flex items-center">
+                        <WordAvatar word={application.registrat.url} />
+
+                        <!-- Mobile vs Desktop view -->
+                        <div class="mx-4 hidden md:flex flex-col">
+                          <h1 class="text-xl text-semibold">Приложение:</h1>
+                          <p class="text-gray-700 text-sm">{application.registrat.url}</p>
+                        </div>
+
+                        <!-- Mobile view -->
+                        <div class="md:hidden mx-2">
+                          <h1 class="text-sm text-semibold">{application.registrat.url}</h1>
+                          <p class="text-gray-700 text-xs">{moment(application.registrat.time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
+                        </div>
+                      </div>
+
+                      <!-- Actions and time -->
+                      <div class="flex items-center">
+                        <div class="h-full mx-2 flex">
+                          <button class="mx-2">
+                            <ThumbsDown color="#ed8936" />
+                          </button>
+
+                          <button class="mx-2">
+                            <Delete color="#e53e3e" />
+                          </button>
+                        </div>
+
+                        <div class="max-w-sm hidden md:flex flex-col">
+                          <p class="text-sm text-gray-700">{moment(application.registrat.time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
+                          <p class="text-xs text-gray-700">Вы дали доступ данному приложению.</p>
+                        </div>
+                      </div>
+                    </div>
+                  {/each}
+                { /if }
+              { /if }
             </div>
           </div>
         </div>

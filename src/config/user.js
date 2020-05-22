@@ -215,7 +215,10 @@ async function loadProfile(token) {
       user.addProfile(account);
     };
   }).catch((error) => {
-    let data = error.response.data;
+    let data = {};
+    if (error != null) {
+      data = error.response.data;
+    };
 
     if (data.error != "UserNotFound") {
       loadProfile(token);
