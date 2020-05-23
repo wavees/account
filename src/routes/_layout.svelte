@@ -10,7 +10,7 @@
 
   // Let's get user token and then
   // let's do something very interesting...
-  const token = cookies.get('token');
+  const token = cookies.get('_account_token');
   if (token != null) {
 		user.setToken(token);
   } else {
