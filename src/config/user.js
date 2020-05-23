@@ -61,6 +61,7 @@ function createUserStore() {
       axios.get(`${api}/user/${token}`)
       .then((response) => {
         let data = response.data;
+        console.log("USER TOKEN");
 
         if (!data.error) {
           // It's an user token!
@@ -81,6 +82,8 @@ function createUserStore() {
         axios.get(`${api}/accounts/${token}`)
         .then((response) => {
           let session = response.data;
+          console.log("SESSION TOKEN");
+          console.log(session);
 
           if (session.error) {
             // User not found

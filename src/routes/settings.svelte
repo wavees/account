@@ -13,7 +13,9 @@
   import TransparentButton from "../components/Buttons/TransparentButton.svelte";
   import Spinner from "../components/Spinner.svelte";
   import Avatar from "../components/Avatar.svelte";
+
   import ApplicationCard from "../components/Settings/ApplicationCard.svelte"
+  import AvatarCard from "../components/Settings/AvatarCard.svelte";
 
   // Icons
   import Delete from "../components/Icons/Delete.svelte";
@@ -21,6 +23,8 @@
 
   // Let's get page store...
   const { page } = stores();
+
+  let fullLoading = false;
 
   // Variables
   let currentProfile = {
@@ -85,13 +89,16 @@
       currentProfile = [$user.current];
     } else {
       // User needs to be logged in.
-      goto('/');
+      // console.log()
+      // goto('/');
     };
   };
 
   // uploadAvatar
   // 
   function uploadAvatar(file) {
+    fullLoading = true;
+
     let formData = new FormData();
     formData.append("avatar", file);
 
@@ -104,12 +111,15 @@
 
       if (data.state) {
         user.loadProfiles($user.tokens);
+        fullLoading = false;
       } else {
         console.log('error');
+        fullLoading = false;
       };
     }).catch((error) => {
       console.log(error);
       console.log(error.response.data);
+      fullLoading = false;
     })
   };
 
@@ -142,7 +152,18 @@
   });
 </script>
 
+<svelte:head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.7/cropper.min.css">
+  <link rel="stylesheet" href="./cropper/rounded.css">
+</svelte:head>
+
 <div style="width: 100%; height: 100vh;" class="bg-gray-100 flex justify-center items-center relative md:px-16 lg:px-32 md:py-8 lg:py-16">
+  { #if fullLoading }
+    <div style="z-index: 999; width: 100%; height: 100vh; background-color:rgba(0, 0, 0, 0.7);" class="absolute flex justify-center items-center">
+      <Spinner />
+    </div>
+  { /if }
+  
   <!-- Header -->
   <div style="z-index: 3;" class="absolute inset-x-0 top-0 w-full bg-white md:bg-gray-100 py-2 md:py-4 flex justify-center md:justify-between items-center px-4 md:px-16 lg:px-32">
     <h1 class="text-semibold text-xl">WAVEES</h1>
@@ -234,7 +255,7 @@
       </div>
     </div>
 
-    <div class="w-full h-full bg-gray-200 pt-12 md:pt-0 {currentProfile.token != null ? "" : "flex justify-center items-center"}" style="overflow-y: auto; overflow-x: hidden; z-index: 1;">
+    <div class="w-full h-full bg-gray-200 pt-12 md:pt-0 {currentProfile.token != null ? "" : "flex justify-center items-center"}" style="overflow-y: auto; overflow-x: hidden;">
       { #if currentProfile.token == null }
         <div class="text-center">
           <h1 class="text-xl text-semibold text-gray-700">Выберите аккаунт</h1>
@@ -245,33 +266,9 @@
           <!-- 
             User Profile picture
           -->
-          <div class="w-full md:w-1/2 px-4 my-4 relative">
-            <div class="w-full h-full rounded-lg bg-white shadow-2xl px-4 py-6">
-              <h1 class="text-xl text-semibold w-full text-center">Аватарка профиля</h1>
-
-              <div class="flex mt-4">
-                <Avatar size="5.5" avatar={currentProfile.avatar} username={currentProfile.username} />
-                
-                <div class="mx-4">
-                  <input class="hidden" id="avatar" name="avatar" type="file" accept=".png, .jpg, .jpeg" on:change={(e) => {
-                    uploadAvatar(document.getElementById('avatar').files[0]);
-                  }}>
-                  
-                  <RoundedButton on:click={(e) => {
-                    document.getElementById('avatar').click();
-                  }} classes="text-sm">
-                    🖼️ Загрузить новую
-                  </RoundedButton>
-
-                  <div class="flex my-4 text-xs">
-                    <TransparentButton>
-                      Отчистить
-                    </TransparentButton>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AvatarCard on:upload={(e) => {
+            uploadAvatar(e.detail);
+          }} avatar={currentProfile.avatar} username={currentProfile.username} />
 
           <!-- Profile name -->
           <div class="w-full md:w-1/2 px-4 my-4 relative">
