@@ -8,14 +8,12 @@
   import { onMount } from "svelte";
   import axios from "axios";
 
-  import moment from "moment";
-
   // Importing components
   import RoundedButton from "../components/Buttons/RoundedButton.svelte";
   import TransparentButton from "../components/Buttons/TransparentButton.svelte";
   import Spinner from "../components/Spinner.svelte";
   import Avatar from "../components/Avatar.svelte";
-  import WordAvatar from "../components/WordAvatar.svelte";
+  import ApplicationCard from "../components/Settings/ApplicationCard.svelte"
 
   // Icons
   import Delete from "../components/Icons/Delete.svelte";
@@ -37,6 +35,11 @@
 
   // loadApprovedApplications
   function loadApprovedApplications(token) {
+    currentProfile.approvedApplications = {
+      loading: true,
+      list: []
+    };
+
     axios.get(`${$api.url}/accounts/${token}/applications`)
     .then((response) => {
       currentProfile.approvedApplications.loading = false;
@@ -302,44 +305,10 @@
                     </div>
                   </div>
                 { :else }
-
                   {#each currentProfile.approvedApplications.list as application}
-                    <div class="w-full flex justify-between py-4 px-4 rounded-lg hover:bg-gray-200">
-                      <!-- Application name -->
-                      <div class="flex items-center">
-                        <WordAvatar word={application.registrat.url} />
-
-                        <!-- Mobile vs Desktop view -->
-                        <div class="mx-4 hidden md:flex flex-col">
-                          <h1 class="text-xl text-semibold">Приложение:</h1>
-                          <p class="text-gray-700 text-sm">{application.registrat.url}</p>
-                        </div>
-
-                        <!-- Mobile view -->
-                        <div class="md:hidden mx-2">
-                          <h1 class="text-sm text-semibold">{application.registrat.url}</h1>
-                          <p class="text-gray-700 text-xs">{moment(application.registrat.time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
-                        </div>
-                      </div>
-
-                      <!-- Actions and time -->
-                      <div class="flex items-center">
-                        <div class="h-full mx-2 flex">
-                          <button class="mx-2">
-                            <ThumbsDown color="#ed8936" />
-                          </button>
-
-                          <button class="mx-2">
-                            <Delete color="#e53e3e" />
-                          </button>
-                        </div>
-
-                        <div class="max-w-sm hidden md:flex flex-col">
-                          <p class="text-sm text-gray-700">{moment(application.registrat.time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
-                          <p class="text-xs text-gray-700">Вы дали доступ данному приложению.</p>
-                        </div>
-                      </div>
-                    </div>
+                    <ApplicationCard on:update={(e) => {
+                      loadApprovedApplications(currentToken);
+                    }} application={application} currentToken={currentToken} />
                   {/each}
                 { /if }
               { /if }
