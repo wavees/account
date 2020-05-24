@@ -20,7 +20,6 @@
   // Creating event dispatcher
   const dispatch = createEventDispatcher();
 
-  let loading = false;
   let error = null;
 
   // Action
@@ -34,14 +33,14 @@
   // This function will delete this application and then
   // it will reload applications list.
   function deleteApplication() {
-    loading = true;
+    dispatch("loading", true);
+    action = null;
 
     if (currentToken != null) {
       axios.delete(`${$api.url}/accounts/${currentToken}/application/${application.registrat.url}`)
       .then((response) => {
         dispatch("update");
       }).catch((error) => {
-        loading = false;
         error = "ServerError";
       })
     }
@@ -60,15 +59,9 @@
 
 <div class="w-full rounded-lg hover:bg-gray-200 relative">
   <!-- Application name -->
-  { #if loading }
-    <div style="z-index: 5;" class="absolute bg-gray-200 w-full h-full flex justify-center items-center">
-      <Spinner size="25" />
-    </div>
-  { /if }
-
   { #if action == "delete" }
     <div in:fade out:fade style="z-index: 4;" class="absolute rounded-lg w-full h-full bg-gray-200 flex justify-center items-center">
-      <div class="flex items-center">
+      <div class="hidden md:flex items-center">
         <WordAvatar word={application.registrat.url} />
         
         <div class="mx-4">
@@ -106,10 +99,10 @@
       <!-- Mobile view -->
       <div class="md:hidden mx-2">
         <h1 class="text-sm text-semibold">{application.registrat.url}</h1>
-        { #if application.registrat.time == null }
+        { #if application.time == null }
           <p class="text-gray-700 text-xs">Неизвестно</p>
         { :else }
-          <p class="text-gray-700 text-xs">{moment(application.registrat.time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
+          <p class="text-gray-700 text-xs">{moment(application.time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
         { /if }
       </div>
     </div>
@@ -129,10 +122,11 @@
       </div>
 
       <div class="max-w-sm hidden md:flex flex-col">
-        { #if application.registrat.time == null }
+        <!-- <p>{application.time}</p> -->
+        { #if application.time == null }
           <p class="text-gray-700 text-sm">Неизвестно</p>
         { :else }
-          <p class="text-sm text-gray-700">{moment(application.registrat.time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
+          <p class="text-sm text-gray-700">{moment(application.time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
         { /if }
 
         <p class="text-xs text-gray-700">Вы дали доступ данному приложению.</p>

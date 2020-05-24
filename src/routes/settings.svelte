@@ -288,12 +288,12 @@
                 <!-- <p class="text-xs"></p> -->
               </div>
 
-              { #if currentProfile.approvedApplications.loading }
-                <div class="w-full flex justify-center items-center py-6">
-                  <Spinner size="35" />
-                </div>
-              { :else }
-
+              <div class="relative">
+                { #if currentProfile.approvedApplications.loading }
+                  <div style="z-index: 2;" class="absolute inset-x-0 top-0 w-full h-full bg-white rounded-b-lg flex justify-center items-center py-6">
+                    <Spinner size="35" />
+                  </div>
+                { /if }
                 { #if currentProfile.approvedApplications.list.length <= 0 }
                   <div class="flex justify-center items-center mt-4">
                     <div class="max-w-sm text-center">
@@ -303,12 +303,14 @@
                   </div>
                 { :else }
                   {#each currentProfile.approvedApplications.list as application}
-                    <ApplicationCard on:update={(e) => {
+                    <ApplicationCard on:loading={(e) => {
+                      currentProfile.approvedApplications.loading = e.detail;
+                    }} on:update={(e) => {
                       loadApprovedApplications(currentToken);
                     }} application={application} currentToken={currentToken} />
                   {/each}
                 { /if }
-              { /if }
+              </div>
             </div>
           </div>
         </div>

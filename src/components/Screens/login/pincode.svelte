@@ -6,6 +6,8 @@
   import axios from "axios";
   import { api } from "../../../config/global.js";
 
+  import Cookie from "cookie-universal";
+
   // Importing components
   import RoundedButton from "../../Buttons/RoundedButton.svelte";
   import TransparentButton from "../../Buttons/TransparentButton.svelte";
@@ -13,15 +15,10 @@
 
   // Event dispatcher
   const dispatch = createEventDispatcher();
-
-  // Error variable
-  // With this variable we can show
-  // error messages.
-
-  // Error codes:
-  // 1 - Invalid pincode 
-  let error = null;
   
+  // Cookies manager
+  const cookies = Cookie();
+
   function verify() {
     let inputs = document.getElementsByClassName("pincode");
     let pincode = [];
@@ -33,10 +30,11 @@
     pincode = pincode.join("");
 
     // Checking pincode size;
-    if (pincode.split("").length < 4) {
-      error = 1;
+    if (pincode.split("").length != 4) {
+      dispatch("error", "authorization.errors.pincodeLength");
     } else {
       // Let's login our user!
+      dispatch("loading", true);
       dispatch("succeed", { pincode: pincode });
     }
   };
@@ -57,10 +55,14 @@
       if (data.username != null) {
         username = data.username;
       }
-    })
+    }).catch((error) => {
+      dispatch("error", "authorization.errors.unableToGetAvatar");
+    });
   });
 
   function keyup(e) {
+    dispatch("error", null);
+
     if (e.keyCode === 13) {
       e.preventDefault();
       verify();
@@ -111,7 +113,12 @@
   </RoundedButton>
 
   <div class="w-full mt-4 flex justify-between">
-    <TransparentButton classes="text-sm" on:click={(e) => {}}>
+    <TransparentButton on:click={(e) => {
+      cookies.remove('login-email');
+
+      dispatch("error", null);
+      dispatch("changeStep", 1);
+    }} classes="text-sm" on:click={(e) => {}}>
       Другой аккаунт
     </TransparentButton>
 

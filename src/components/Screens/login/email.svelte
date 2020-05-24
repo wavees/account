@@ -72,19 +72,19 @@
         });
       });
     } else {
-      error = 1;
-
+      dispatch("error", "authorization.errors.invalidEmail");
       dispatch("loading", false);
     }
   };
 
-  // Error variable (It will contain error message, yes)
-  
-  // Error codes:
-  // 1 - Invalid email
-  // 2 - Server Error
+  function keyup() {
+    dispatch("error", null);
 
-  let error = null;
+    if (e.keyCode === 13) {
+      e.preventDefault();
+      verify();
+    };
+  };
 
   // It's very bad code, isn't it?
   onMount(() => {
@@ -102,15 +102,12 @@
     <p>введите Вашу почту</p>
   </div>
 
-  <input on:keyup={(e) => {
-    if (e.keyCode === 13) {
-      e.preventDefault();
-      verify();
-    };
-  }} bind:value={email} id="email" class="focus appearance-none w-full py-2 px-3 border border-dashed" type="text" placeholder="email">
+  <input on:keyup={(e) => {keyup(e)}} bind:value={email} id="email" class="focus appearance-none w-full py-2 px-3 border border-dashed" type="text" placeholder="email">
   
   <div class="my-6 flex w-full justify-center items-center">
-    <TransparentButton classes="mx-2">
+    <TransparentButton on:click={(e) => {
+      window.location.href = "/";
+    }} classes="mx-2">
       Назад
     </TransparentButton>
 

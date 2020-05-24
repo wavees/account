@@ -3,6 +3,10 @@
   import { goto } from "@sapper/app";
   import { stores } from "@sapper/app";
   import { onMount } from "svelte";
+  
+  import { _ } from "svelte-i18n";
+
+  import { slide } from "svelte/transition";
 
   import axios from "axios";
   import Cookie from "cookie-universal";
@@ -34,9 +38,11 @@
   // Login process step.
     
   // Should we show loading screen or not?
-  let loading = false;
+  let loading = true;
   let currentToken = null;
-  let error = null;
+  let error = {
+    text: null
+  };
 
   // Values:
   // 0 - null
@@ -61,13 +67,17 @@
         // so let's show him account chooser screen. (dumb name, I know)
         user.loadProfiles($user.tokens);
 
+        error.text = null;
+
         step = 4;
         loading = false;
       } else {
         // Check if user is logged in. (Check for token);
         if ($user.current.token != null) {
           // Let's check if user have another accounts
-          if ($user.tokens.length >= 1) {
+          if ($user.tokens.length > 1) {
+            error.text = null;
+
             step = 4;
             loading = false;
           } else {
@@ -85,10 +95,14 @@
                 // user to callback page...
                 redirect($user.current.token);
               } else {
+                error.text = null;
+
                 step = 5;
                 loading = false;
               }
-            }).catch((error) => {
+            }).catch(() => {
+              error.text = null;
+
               step = 5;
               loading = false;
             })
@@ -104,17 +118,22 @@
             axios.get(`${$api.url}/user/check/${email}`)
             .then((response) => {
               let data = response.data;
-              // User exists. Le'ts send our user to
+              // User exists. Let's send our user to
               // "pincode" page.
+              error.text = null;
 
               step = 2;
               loading = false;
             })
-            .catch((error) => {    
+            .catch(() => {  
+              error.text = null;
+              
               step = 1;
               loading = false;
             });
           } else {
+            error.text = null;
+            
             step = 1;
             loading = false;
           };
@@ -128,11 +147,15 @@
         // User is registered:
         // show him pincode screen;
         if (data.userExists == true) {
+          error.text = null;
+
           step = 2;
           loading = false;
         // User doesn't exist:
         // show him register screen;
         } else {
+          error.text = null;
+
           step = 3;
           loading = false;
         }
@@ -148,10 +171,14 @@
           if (data.agreed) {
             redirect(type.data.token);
           } else {
+            error.text = null;
+
             step = 5;
             loading = false;
           }
-        }).catch((error) => {
+        }).catch(() => {
+          error.text = null;
+
           step = 5;
           loading = false;
         })
@@ -159,6 +186,8 @@
         // Let's redirect user to pincode page.
         // User need to write his pincode to
         // continue;
+        error.text = null;
+
         step = 2;
         loading = false;
       };
@@ -168,7 +197,9 @@
   };
 
   callback.subscribe((value) => {
-    if (value.url != null || id == "add") { 
+    if (value.url != null || id == "add") {
+      loading = false;
+
       defineStep("startup");
     }});
 
@@ -199,9 +230,9 @@
         // Let's define user's next step
         defineStep({ type: "register", data: data });
       };
-    }).catch((error) => {
-      console.log("ERROR 6")
-      console.log(error);
+    }).catch(() => {
+      loading = false;
+      error.text = "authorization.errors.unableToRegister";
     })
   };
 
@@ -244,11 +275,11 @@
                 } else {
                   window.location.href = "/";
                 }
-              }).catch((error) => {
-                console.log('erro 312');
-                console.log(error);
+              }).catch(() => {
+                loading = false;
+                error.text = "authorization.errors.unableToAddAccount";
               });
-            }).catch((error) => {
+            }).catch(() => {
               // It's an user token, so let's create new session
               let query = {
                 profiles: [
@@ -278,13 +309,15 @@
 
                   cookies.remove('login-email');
                 };
-              }).catch((error) => {
-                console.log('erro 3123');
-                console.log(error);
+              }).catch(() => {
+                loading = false;
+                error.text = "authorization.errors.unableToRegisterSession";
               });
             });
           } else {
             // Procceed to login...
+            error.text = null;
+
             loading = false;
             user.setToken(data.token);
 
@@ -300,6 +333,8 @@
           // axios.put(`${$api.url}/accounts/${cookie}`)
         } else {
           // Procceed to login...
+          error.text = null;
+
           loading = false;
           user.setToken(data.token);
 
@@ -313,9 +348,10 @@
           cookies.remove("login-email");
         }
       }
-    }).catch((error) => {
-      console.log("ERROR 2");
-      console.log(error);
+    }).catch(() => {
+      loading = false;
+
+      error.text = "authorization.errors.unableToLogin";
     });
   };
 
@@ -332,8 +368,7 @@
 
       window.location.href = `http://${$callback.url}/?token=${data.token}`;
     }).catch((error) => {
-      console.log("error 3");
-      console.log(error.response.data);
+      error.text = "authorization.errors.unableToFinishCallback";
     })
   };
 
@@ -351,13 +386,21 @@
   });
 </script>
 
-<div style="background-image: url('background.png'); background-size: cover; background-position: center center; overflow: hidden; width: 100%; height: 100vh;" class="flex justify-center items-center relative">
+<!-- 
+  Header
+ -->
+
+<svelte:head>
+  <title>Wavees Authorization</title>
+</svelte:head>
+
+<div style="background-image: url('background.png'); background-size: cover; background-position: center center; overflow: hidden; width: 100%; height: 100vh;" class="flex flex-col justify-center items-center relative">
 
   <!-- 
     @section container
    -->
-  <div class="rounded-lg bg-white relative mx-4 md:mx-0 w-full md:max-w-md shadow-xl">
-    { #if !$callback.loaded || loading }
+  <div class="{ error.text != null ? "rounded-t-lg" : "rounded-lg"} bg-white relative mx-4 md:mx-0 w-full md:max-w-md shadow-xl">
+    { #if loading }
       <div style="z-index: 3;" class="w-full h-full absolute flex justify-center items-center bg-white">
         <Spinner size="30" />
       </div>
@@ -410,7 +453,7 @@
     <!-- 
       Different screens
      -->
-    <div class="w-full h-full px-4 py-6">
+    <div class="w-full h-full px-4 py-4">
 
       { #if step == 0 }
         <div class="text-center">
@@ -430,6 +473,8 @@
           tmpUser.email = e.detail.email;
 
           defineStep({ type: "emailChanged", data: e.detail });
+        }} on:error={(e) => {
+          error.text = e.detail;
         }} />
       { :else if step == 2 } 
         <PincodeScreen email={tmpUser.email} on:changeStep={(e) => {
@@ -440,6 +485,8 @@
           login();
         }} on:loading={(e) => {
           loading = e.detail;
+        }} on:error={(e) => {
+          error.text = e.detail;
         }} />
       { :else if step == 3 }
         <RegisterScreen bind:username={tmpUser.username} on:changeStep={(e) => {
@@ -450,19 +497,48 @@
           register();
         }} on:loading={(e) => {
           loading = e.detail;
+        }} on:error={(e) => {
+          error.text = e.detail;
         }} />
       { :else if step == 4 }
         <ChooserScreen on:succeed={(e) => {
           defineStep({ type: "login", data: e.detail });
-        }}></ChooserScreen>
+        }} on:error={(e) => {
+          error.text = e.detail;
+        }} />
       { :else if step == 5 }
         <DisclaimerScreen on:succeed={(e) => {
           if (currentToken == null) {
             currentToken = cookies.get("_account_token");
           };
           redirect(currentToken);
-        }} />
+        }} on:error={(e) => {
+          error.text = e.detail;
+        }} email={tmpUser.email} />
       { /if }
     </div>
   </div>
+
+  <!-- 
+    Error box
+    Appears when error is occured and
+    disappers somehow..
+  -->
+
+  { #if error.text != null }
+    <div in:slide out:slide class="rounded-b-lg mx-4 w-full md:max-w-md bg-gray-200 flex justify-start items-center px-2 md:px-6 py-4 md:py-6">
+      <!-- 
+        Icon here
+      -->
+      <img style="width: 1.8em; height: 1.8em;" src="./icons/alert-triangle.svg" alt="Alert icon">
+
+      <!-- 
+        And text here 
+      -->
+      <div class="mx-4">
+        <h1 class="text-xl text-semibold">Произошла ошибка</h1>
+        <p class="text-gray-700">{$_(error.text, { default: "Unrecognized error message" })}</p>
+      </div>
+    </div>
+  { /if }
 </div>

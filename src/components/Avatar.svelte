@@ -21,7 +21,7 @@
   { #if avatar == null }
     <div class="absolute rounded-full flex justify-center items-center {colors[Math.floor(Math.random() * colors.length)]}" style="z-index: 1; width: {size}em; height: {size}em;">
       <span style="font-size: {size / 2}em;" class="font-semibold text-white">
-        {username.split("")[0].toUpperCase()}
+        {username == null ? "UN" : username.split("")[0].toUpperCase()}
       </span>
     </div>
   { :else }

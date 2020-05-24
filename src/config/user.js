@@ -61,8 +61,6 @@ function createUserStore() {
       axios.get(`${api}/user/${token}`)
       .then((response) => {
         let data = response.data;
-        console.log("USER TOKEN");
-
         if (!data.error) {
           // It's an user token!
           update((object) => {
@@ -71,8 +69,10 @@ function createUserStore() {
 
             object.current.token = token;
             object.current.email = data.email;
-            object.current.username = data.username
-            object.current.avatar = data.avatar
+            object.current.username = data.username;
+            object.current.avatar = data.avatar;
+
+            object.tokens = [token];
 
             return object;
           });
@@ -82,8 +82,6 @@ function createUserStore() {
         axios.get(`${api}/accounts/${token}`)
         .then((response) => {
           let session = response.data;
-          console.log("SESSION TOKEN");
-          console.log(session);
 
           if (session.error) {
             // User not found

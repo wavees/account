@@ -15,8 +15,6 @@
 
   // verify
   function verify(token) {
-    console.log("VERIFY TOKEN:");
-    console.log(token);
     dispatch("succeed", { token });
   };
 
