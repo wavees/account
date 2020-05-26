@@ -255,7 +255,7 @@
         if (id == "add") {
           // Let's check if current token is session token
           // or if it's an user token.
-          let token = cookies.get('_account_token');
+          let token = cookies.get('_account_token', { domain: "wavees.co.vu" });
 
           if (token != null) {
             // Checking
@@ -304,6 +304,7 @@
                 if (data.token != null) {
                   cookies.set("_account_token", data.token, {
                     path: "/",
+                    domain: "wavees.co.vu",
                     expires: moment().add("1", "y").toDate()
                   });
 
@@ -326,6 +327,7 @@
 
             cookies.set("_account_token", data.token, {
               path: "/",
+              domain: "wavees.co.vu",
               expires: moment().add("1", "y").toDate()
             });
             cookies.remove("login-email");
@@ -343,6 +345,7 @@
 
           cookies.set("_account_token", data.token, {
             path: "/",
+            domain: "wavees.co.vu",
             expires: moment().add("1", "y").toDate()
           });
           cookies.remove("login-email");
@@ -509,7 +512,7 @@
       { :else if step == 5 }
         <DisclaimerScreen on:succeed={(e) => {
           if (currentToken == null) {
-            currentToken = cookies.get("_account_token");
+            currentToken = cookies.get("_account_token", { domain: "wavees.co.vu" });
           };
           redirect(currentToken);
         }} on:error={(e) => {
