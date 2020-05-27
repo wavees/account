@@ -14,6 +14,8 @@
   import Spinner from "../components/Spinner.svelte";
   import Avatar from "../components/Avatar.svelte";
 
+  import LogoutButton from "../components/Buttons/LogoutButton.svelte";
+
   import ApplicationCard from "../components/Settings/ApplicationCard.svelte"
   import AvatarCard from "../components/Settings/AvatarCard.svelte";
 
@@ -153,8 +155,12 @@
 </script>
 
 <svelte:head>
+  <title>Account settings</title>
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.7/cropper.min.css">
   <link rel="stylesheet" href="./cropper/rounded.css">
+
+  <link rel="stylesheet" href="./fonts/Junegull/junegull.css">
 </svelte:head>
 
 <div style="width: 100%; height: 100vh;" class="bg-gray-100 flex justify-center items-center relative md:px-16 lg:px-32 md:py-8 lg:py-16">
@@ -165,18 +171,43 @@
   { /if }
   
   <!-- Header -->
-  <div style="z-index: 3;" class="absolute inset-x-0 top-0 w-full bg-white md:bg-gray-100 py-2 md:py-4 flex justify-center md:justify-between items-center px-4 md:px-16 lg:px-32">
-    <h1 class="text-semibold text-xl">WAVEES</h1>
+  <div style="z-index: 3; height: 5rem;" class="absolute inset-x-0 top-0 w-full bg-white md:bg-gray-100 flex justify-center md:justify-between items-center px-4 md:px-16 lg:px-32">
+    { #if $page.query.return != null }
+      <div on:click={(e) => {
+        let url = $page.query.return;
 
-    <div class="hidden md:flex items-center text-xs">
-      <TransparentButton classes="mx-1">Про сервис</TransparentButton>
-      <TransparentButton classes="mx-1">Компания</TransparentButton>
-      <RoundedButton classes="ml-1 text-sm">🚀 Space</RoundedButton>
-    </div>
+        if (url.split('').includes("@")) {
+          window.location.href = `https://${url.replace('@', '')}`;
+        } else {
+          window.location.href = $page.query.return;
+        }
+      }} style="cursor: pointer;" class="flex items-center">
+        <img style="width: 1.6em; height: 1.6em;" src="./icons/chevron-left.svg" alt="Return icon">
+
+        <div class="mx-4">
+          <h1>Вернуться назад</h1>
+          <p class="text-sm text-gray-700">{$page.query.return.split('').includes("@") ? `https://${$page.query.return.replace("@", '')}` : `https://account.wavees.co.vu/${$page.query.return == "/" ? "" : $page.query.return}`}</p>
+        </div>
+      </div>
+
+      <!-- User account -->
+      <div class="hidden md:flex">
+        <LogoutButton />
+      </div>
+    { :else }
+      <h1 style="font-family: Junegull;" class="text-xl">WAVEES</h1>
+
+      <div class="hidden md:flex items-center text-xs">
+        <TransparentButton classes="mx-1">Про сервис</TransparentButton>
+        <TransparentButton classes="mx-1">Компания</TransparentButton>
+
+        <LogoutButton />
+      </div>
+    { /if }
   </div>
   
   <!-- Container -->
-  <div class="w-full h-full bg-white rounded-lg shadow-xl flex" style="overflow: hidden;">
+  <div class="w-full h-full bg-white rounded-lg shadow-xl flex mt-4" style="overflow: hidden;">
     <!-- User list -->
 
     <!-- Mobile view -->
@@ -255,7 +286,7 @@
       </div>
     </div>
 
-    <div class="w-full h-full bg-gray-200 pt-12 md:pt-0 {currentProfile.token != null ? "" : "flex justify-center items-center"}" style="overflow-y: auto; overflow-x: hidden;">
+    <div class="w-full h-full bg-gray-200 pt-24 md:pt-0 {currentProfile.token != null ? "" : "flex justify-center items-center"}" style="overflow-y: auto; overflow-x: hidden;">
       { #if currentProfile.token == null }
         <div class="text-center">
           <h1 class="text-xl text-semibold text-gray-700">Выберите аккаунт</h1>

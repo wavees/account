@@ -1,4 +1,7 @@
 <script>
+  // Let's import application's styles
+  import Tailwind from "../styles/tailwind.svelte";
+
   // import
 	import { user } from "../config/user.js";
 	
