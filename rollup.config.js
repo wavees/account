@@ -10,7 +10,10 @@ import pkg from './package.json';
 
 import sveltePreprocess from 'svelte-preprocess'
 
-const preprocess = sveltePreprocess({ postcss: true });
+const preprocess = sveltePreprocess({ 
+	postcss: true 
+});
+
 const mode = process.env.NODE_ENV;
 const dev = mode === 'development';
 const legacy = !!process.env.SAPPER_LEGACY_BUILD;
