@@ -77,7 +77,7 @@
     }
   };
 
-  function keyup() {
+  function keyup(e) {
     dispatch("error", null);
 
     if (e.keyCode === 13) {

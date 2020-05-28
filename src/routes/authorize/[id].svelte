@@ -86,7 +86,7 @@
             // we show user disclaimer;
             if (id == "add") return;
 
-            axios.get(`${$api.url}/accounts/${$user.current.token}/applications/${$callback.url.replace('http://','').replace('https://','').split(/[/?#]/)[0]}`)
+            axios.get(`${$api.url}/accounts/${$user.current.token}/applications/${$callback.appId}`)
             .then((response) => {
               let data = response.data;
 
@@ -164,7 +164,7 @@
         // instantly or we need to show Redirect Screen.
         currentToken = type.data.token;
 
-        axios.get(`${$api.url}/accounts/${type.data.token}/applications/${$callback.url.replace('http://','').replace('https://','').split(/[/?#]/)[0]}`)
+        axios.get(`${$api.url}/accounts/${type.data.token}/applications/${$callback.appId}}`)
         .then((response) => {
           let data = response.data;
           
@@ -351,7 +351,7 @@
           cookies.remove("login-email");
         }
       }
-    }).catch(() => {
+    }).catch((error) => {
       loading = false;
 
       error.text = "authorization.errors.unableToLogin";

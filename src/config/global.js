@@ -15,9 +15,8 @@ export { general };
 // private API, that was made especially for this site.
 const api = 
 readable({
-  // I dunno what is this thing doing here.
-  // I think that I should delete this... But...
-  defaultAvatar: "https://cdn.dribbble.com/users/45488/screenshots/9084073/media/f889543c2e901048f8da2d9915d0bf37.jpg",
+  // 
+  applicationToken: "vdS1YTSug6E2",
 
   // API URL and version parameters
   url: "https://api.wavees.co.vu", 

@@ -9,6 +9,8 @@ function createCallbackStore() {
 
     id: null,
     url: null,
+
+    appId: null
   };
 
   // Let's get some needed things..
@@ -31,6 +33,7 @@ function createCallbackStore() {
           
           object.id = id;
           object.url = data.url;
+          object.appId = data.registrat.id;
 
           return object;
         });
