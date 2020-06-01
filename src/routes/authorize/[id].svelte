@@ -61,8 +61,10 @@
     loading = true;
 
     if (type == "startup") {
+      console.log("STARTUP");
       // Check if user have another accounts in current session
       if ($user.tokens.length > 1) {
+        console.log("MORE THAN ONE");
         // User have more than one account in this session,
         // so let's show him account chooser screen. (dumb name, I know)
         user.loadProfiles($user.tokens);
@@ -72,42 +74,40 @@
         step = 4;
         loading = false;
       } else {
+        console.log("NO #1");
         // Check if user is logged in. (Check for token);
         if ($user.current.token != null) {
-          // Let's check if user have another accounts
-          if ($user.tokens.length > 1) {
-            error.text = null;
+          console.log("#1");
+          // Let's check if we need to instantly
+          // send user to application or should
+          // we show user disclaimer;
+          if (id == "add") return;
 
-            step = 4;
-            loading = false;
-          } else {
-            // Let's check if we need to instantly
-            // send user to application or should
-            // we show user disclaimer;
-            if (id == "add") return;
+          axios.get(`${$api.url}/account/${$user.current.token}/applications/${$callback.appId}`)
+          .then((response) => {
+            let data = response.data;
 
-            axios.get(`${$api.url}/accounts/${$user.current.token}/applications/${$callback.appId}`)
-            .then((response) => {
-              let data = response.data;
-
-              if (data.agreed) {
-                // Let's get new user's token and then redirect
-                // user to callback page...
-                redirect($user.current.token);
-              } else {
-                error.text = null;
-
-                step = 5;
-                loading = false;
-              }
-            }).catch(() => {
+            if (data.agreed) {
+              // Let's get new user's token and then redirect
+              // user to callback page...
+              console.log("#8");
+              redirect($user.current.token);
+            } else {
               error.text = null;
 
+              console.log("#7");
               step = 5;
               loading = false;
-            })
-          }
+            }
+          }).catch(() => {
+            error.text = null;
+
+            console.log("#6");
+            step = 5;
+            loading = false;
+          })
         } else {
+          console.log("#2");
           // Check for user email;
           if (cookies.get('login-email') != null) {
             // Let's check if user with this email
@@ -122,18 +122,21 @@
               // "pincode" page.
               error.text = null;
 
+              console.log("#3");
               step = 2;
               loading = false;
             })
             .catch(() => {  
               error.text = null;
-              
+              console.log("#4");
+
               step = 1;
               loading = false;
             });
           } else {
             error.text = null;
             
+            console.log("#5");
             step = 1;
             loading = false;
           };
@@ -160,15 +163,20 @@
           loading = false;
         }
       } else if (type.type == "login") {
+        console.log("LOGIN DEFINED");
         // Let's check if we need to redirect user
         // instantly or we need to show Redirect Screen.
         currentToken = type.data.token;
 
-        axios.get(`${$api.url}/accounts/${type.data.token}/applications/${$callback.appId}}`)
+        console.log(currentToken);
+
+        axios.get(`${$api.url}/account/${type.data.token}/applications/${$callback.appId}}`)
         .then((response) => {
           let data = response.data;
+          console.log(data);
           
           if (data.agreed) {
+            console.log("REDIRECT");
             redirect(type.data.token);
           } else {
             error.text = null;
@@ -240,6 +248,10 @@
   // Login function. Hm, just logins user!
   // Nothing special
   function login() {
+    console.log("LOGIN STAGE");
+    console.log(tmpUser.email);
+    console.log(tmpUser.pincode);
+
     // Login.
     axios.post(`${$api.url}/user/login`, {
       email: tmpUser.email,
@@ -259,11 +271,11 @@
 
           if (token != null) {
             // Checking
-            axios.get(`${$api.url}/accounts/${token}`)
+            axios.get(`${$api.url}/account/${token}`)
             .then((response) => {
               // It's a session token, so let's just add new
               // profile to this session.
-              axios.put(`${$api.url}/accounts/${token}`, { token: data.token })
+              axios.put(`${$api.url}/account/${token}`, { token: data.token })
               .then((response) => {
                 let data = response.data;
 
@@ -288,7 +300,7 @@
                 ]
               };
               
-              axios.post(`${$api.url}/accounts`, query)
+              axios.post(`${$api.url}/account`, query)
               .then((response) => {
                 let data = response.data;
 
@@ -335,6 +347,7 @@
           // axios.put(`${$api.url}/accounts/${cookie}`)
         } else {
           // Procceed to login...
+          console.log("LOGIND USER");
           error.text = null;
 
           loading = false;
@@ -345,14 +358,16 @@
 
           cookies.set("_account_token", data.token, {
             path: "/",
-            domain: "wavees.co.vu",
+            // domain: "wavees.co.vu",
             expires: moment().add("1", "y").toDate()
           });
           cookies.remove("login-email");
         }
       }
-    }).catch((error) => {
+    }).catch((err) => {
       loading = false;
+      console.log("UNABLE TO LOGIN");
+      console.log(err);
 
       error.text = "authorization.errors.unableToLogin";
     });
@@ -363,7 +378,12 @@
   // on redirect screen. It'll get new user token
   // and then redirect user to application.
   function redirect(token) {
+    console.log("REDIRECT");
     loading = true;
+
+    console.log($api.url);
+    console.log(id);
+    console.log(token);
 
     axios.get(`${$api.url}/callback/finish/${id}/${token}`)
     .then((response) => {
@@ -371,6 +391,9 @@
 
       window.location.href = `http://${$callback.url}/?token=${data.token}`;
     }).catch((error) => {
+      console.log("ERROR");
+      console.log(error);
+      loading = false;
       error.text = "authorization.errors.unableToFinishCallback";
     })
   };
@@ -485,6 +508,7 @@
         }} on:succeed={(e) => {
           tmpUser.pincode = e.detail.pincode;
 
+          console.log("LOGIN #1");
           login();
         }} on:loading={(e) => {
           loading = e.detail;

@@ -14,6 +14,7 @@
   // Let's get user token and then
   // let's do something very interesting...
   const token = cookies.get('_account_token');
+  console.log(token);
   if (token != null) {
 		user.setToken(token);
   } else {
@@ -25,6 +26,7 @@
 { #if !$user.loaded }
 	<div style="width: 100%; height: 100vh;" class="bg-white flex justify-center items-center">
 		<Spinner />
+    { $user.error }
 	</div>
 { :else }
 	<main>
