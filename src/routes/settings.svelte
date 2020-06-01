@@ -46,10 +46,12 @@
       list: []
     };
 
-    axios.get(`${$api.url}/accounts/${token}/applications`)
+    axios.get(`${$api.url}/account/${token}/applications`)
     .then((response) => {
       currentProfile.approvedApplications.loading = false;
       currentProfile.approvedApplications.list = response.data;
+    
+      console.log(response.data);
     }).catch((error) => {
       currentProfile.approvedApplications.loading = false;
 
@@ -338,7 +340,7 @@
                       currentProfile.approvedApplications.loading = e.detail;
                     }} on:update={(e) => {
                       loadApprovedApplications(currentToken);
-                    }} application={application} currentToken={currentToken} />
+                    }} application={application} time={application.time} currentToken={currentToken} />
                   {/each}
                 { /if }
               </div>

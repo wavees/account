@@ -1,6 +1,6 @@
 <script>
   // import
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import { fade } from "svelte/transition";
   import moment from "moment";
   import axios from "axios";
@@ -46,13 +46,22 @@
     }
   };
 
+  onMount(() => {
+    axios.get(`${$api.url}/application/${application.appId}`)
+    .then((response) => {
+      let data = response.data;
+
+      application.name = data.name;
+    });
+  });
+
   // Let's export some needed variables
   export let application = {
-    registrat: {
-      time: null,
-      url: "Unknown Application"
-    }
+    name: "undefined",
+    appId: null
   };
+
+  export let time = new Date();
 
   export let currentToken = null;
 </script>
@@ -62,11 +71,11 @@
   { #if action == "delete" }
     <div in:fade out:fade style="z-index: 4;" class="absolute rounded-lg w-full h-full bg-gray-200 flex justify-center items-center">
       <div class="hidden md:flex items-center">
-        <WordAvatar word={application.registrat.url} />
+        <WordAvatar word={application.name} />
         
         <div class="mx-4">
           <h1 class="text-semibold">Удалить приложение?</h1>
-          <p class="text-sm text-gray-700">{application.registrat.url}</p>
+          <p class="text-sm text-gray-700">{application.name}</p>
         </div>
       </div>
 
@@ -88,21 +97,21 @@
 
   <div class="w-full h-full py-4 px-4 flex justify-between">
     <div class="flex items-center">
-      <WordAvatar word={application.registrat.url} />
+      <WordAvatar word={application.name} />
 
       <!-- Mobile vs Desktop view -->
       <div class="mx-4 hidden md:flex flex-col">
         <h1 class="text-xl text-semibold">Приложение:</h1>
-        <p class="text-gray-700 text-sm">{application.registrat.url}</p>
+        <p class="text-gray-700 text-sm">{application.name}</p>
       </div>
 
       <!-- Mobile view -->
       <div class="md:hidden mx-2">
-        <h1 class="text-sm text-semibold">{application.registrat.url}</h1>
+        <h1 class="text-sm text-semibold">{application.name}</h1>
         { #if application.time == null }
           <p class="text-gray-700 text-xs">Неизвестно</p>
         { :else }
-          <p class="text-gray-700 text-xs">{moment(application.time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
+          <p class="text-gray-700 text-xs">{moment(time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
         { /if }
       </div>
     </div>
@@ -126,7 +135,7 @@
         { #if application.time == null }
           <p class="text-gray-700 text-sm">Неизвестно</p>
         { :else }
-          <p class="text-sm text-gray-700">{moment(application.time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
+          <p class="text-sm text-gray-700">{moment(time).locale('ru').format("dddd, MMMM Do YYYY, h:mm")}</p>
         { /if }
 
         <p class="text-xs text-gray-700">Вы дали доступ данному приложению.</p>
