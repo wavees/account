@@ -9,7 +9,7 @@
 
   // Importing components
   import Spinner from "../Spinner.svelte";
-  import WordAvatar from "../WordAvatar.svelte";
+  import Avatar from "../Avatar.svelte";
   import RoundedButton from "../Buttons/RoundedButton.svelte";
   import TransparentButton from "../Buttons/TransparentButton.svelte";
 
@@ -37,7 +37,7 @@
     action = null;
 
     if (currentToken != null) {
-      axios.delete(`${$api.url}/accounts/${currentToken}/application/${application.registrat.url}`)
+      axios.delete(`${$api.url}/account/${currentToken}/application/${application.registrat.url}`)
       .then((response) => {
         dispatch("update");
       }).catch((error) => {
@@ -51,6 +51,8 @@
     .then((response) => {
       let data = response.data;
 
+      console.log(data);
+      application.logotype = data.logotype;
       application.name = data.name;
     });
   });
@@ -58,6 +60,8 @@
   // Let's export some needed variables
   export let application = {
     name: "undefined",
+    logotype: null,
+
     appId: null
   };
 
@@ -71,7 +75,7 @@
   { #if action == "delete" }
     <div in:fade out:fade style="z-index: 4;" class="absolute rounded-lg w-full h-full bg-gray-200 flex justify-center items-center">
       <div class="hidden md:flex items-center">
-        <WordAvatar word={application.name} />
+        <Avatar username={application.name} avatar={application.logotype} />
         
         <div class="mx-4">
           <h1 class="text-semibold">Удалить приложение?</h1>
@@ -97,7 +101,7 @@
 
   <div class="w-full h-full py-4 px-4 flex justify-between">
     <div class="flex items-center">
-      <WordAvatar word={application.name} />
+      <Avatar username={application.name} avatar={application.logotype} />
 
       <!-- Mobile vs Desktop view -->
       <div class="mx-4 hidden md:flex flex-col">
