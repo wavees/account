@@ -63,7 +63,19 @@ function createUserStore() {
         // Let's determine what type of object
         // is it.
         if (data.type == "user") {
+          // And now let's populate our store with new data
+          update((object) => {
+            object.loaded = true;
 
+            object.current.token    = token;
+            object.current.email    = data.email;
+            object.current.username = data.username;
+            object.current.avatar   = data.avatar;
+
+            object.tokens           = [token];
+            
+            return object;
+          });
         } else if (data.type == "session") {
           // Let's update our store with
           // new data

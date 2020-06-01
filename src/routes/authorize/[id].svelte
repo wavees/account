@@ -270,62 +270,86 @@
           let token = cookies.get('_account_token', { domain: "wavees.co.vu" });
 
           if (token != null) {
-            // Checking
+            // Now we need to check if it's an user
+            // token or it's a session token
             axios.get(`${$api.url}/account/${token}`)
             .then((response) => {
-              // It's a session token, so let's just add new
-              // profile to this session.
-              axios.put(`${$api.url}/account/${token}`, { token: data.token })
-              .then((response) => {
-                let data = response.data;
+              let account = response.data;
 
-                // Check if we need to return user to
-                // some callback
-
-                if ($page.query.return != null) {
-                  window.location.href = `/${$page.query.return}`;
-                } else {
-                  window.location.href = "/";
-                }
-              }).catch(() => {
-                loading = false;
-                error.text = "authorization.errors.unableToAddAccount";
-              });
-            }).catch(() => {
-              // It's an user token, so let's create new session
-              let query = {
-                profiles: [
-                  token,
-                  data.token
-                ]
-              };
-              
-              axios.post(`${$api.url}/account`, query)
-              .then((response) => {
-                let data = response.data;
-
-                // Check if we need to return user to
-                // some callback
-                
-                if ($page.query.return != null) {
-                  window.location.href = `/${$page.query.return}`;
-                } else {
-                  window.location.href = "/";
+              // And now let's check the type of
+              // this token.
+              if (account.type == "user") {
+                // It's an user token, so we
+                // need to create new session.
+                let query = {
+                  profiles: [
+                    token,
+                    data.token
+                  ]
                 }
 
-                if (data.token != null) {
-                  cookies.set("_account_token", data.token, {
-                    path: "/",
-                    domain: "wavees.co.vu",
-                    expires: moment().add("1", "y").toDate()
-                  });
+                // Make post request.
+                axios.post(`${$api.url}/account`, query)
+                .then((response) => {
+                  let data = response.data;
+
+                  // Check if we need to return user to
+                  // some callback
+                  if ($page.query.return != null) {
+                    if ($page.query.return.includes("@")) {
+                      window.location.href = `http://${$page.query.return}`;
+                    } else {
+                      window.location.href = `/${$page.query.return}`;
+                    };
+                  } else {
+                    window.location.href = "/";
+                  }
+
+                  if (data.token != null) {
+                    cookies.set("_account_token", data.token, {
+                      path: "/",
+                      domain: "wavees.co.vu",
+                      expires: moment().add("1", "y").toDate()
+                    });
+
+                    cookies.remove('login-email');
+                  };
+                }).catch((error) => {
+                  loading = false;
+                  error.text = "authorization.errors.unableToRegisterSession";
+                });
+              } else if (account.type == "session") {
+                // It's a session token, and so
+                // we just need to add new token
+                // to this session.
+                axios.put(`${$api.url}/account/${token}/${data.token}`)
+                .then((response) => {
+                  let data = response.data;
+
+                  // Here we just need to redirect
+                  // user.
+                  if ($page.query.return != null) {
+                    if ($page.query.return.includes("@")) {
+                      window.location.href = `http://${$page.query.return}`;
+                    } else {
+                      window.location.href = `/${$page.query.return}`;
+                    };
+                  } else {
+                    window.location.href = "/";
+                  }
 
                   cookies.remove('login-email');
-                };
-              }).catch(() => {
+                }).catch((error) => {
+                  loading = false;
+                  error.text = "authorization.errors.unableToAddAccount";
+                })
+              } else {
                 loading = false;
                 error.text = "authorization.errors.unableToRegisterSession";
-              });
+              }
+            }).catch((error) => {
+              loading = false;
+              error.text = "authorization.errors.unableToRegisterSession";
             });
           } else {
             // Procceed to login...
