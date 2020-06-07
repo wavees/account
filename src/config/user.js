@@ -59,7 +59,7 @@ function createUserStore() {
       axios.get(`${api}/account/${token}`)
       .then((response) => {
         let data = response.data;
-        
+
         // Let's determine what type of object
         // is it.
         if (data.type == "user") {
@@ -90,6 +90,7 @@ function createUserStore() {
           // user account and then let's populate
           // our store with new data.
           let currentToken = data.current.token == null ? data.profiles[0] : data.current.token;
+
           axios.get(`${api}/account/${currentToken}`)
           .then((response) => {
             let data = response.data;
@@ -102,10 +103,6 @@ function createUserStore() {
               object.current.avatar   = data.avatar;
 
               return object;
-              // token: null,
-              // email: null,
-              // username: null,
-              // avatar: null
             });
           });
         } else {
@@ -116,8 +113,13 @@ function createUserStore() {
             return object;
           });
         };
-      }).catch((error) => {
+      }).catch(() => {
+        update((object) => {
+          object.loaded = false;
+          object.error = "NotFound";
 
+          return object;
+        });
       });
     },
 

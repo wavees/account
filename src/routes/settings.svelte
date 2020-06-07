@@ -16,6 +16,7 @@
 
   import LogoutButton from "../components/Buttons/LogoutButton.svelte";
 
+  import TokensScreen from "../components/Settings/TokensScreen.svelte";
   import ApplicationCard from "../components/Settings/ApplicationCard.svelte"
   import AvatarCard from "../components/Settings/AvatarCard.svelte";
 
@@ -34,6 +35,10 @@
     approvedApplications: {
       loading: true,
       list: []
+    },
+    tokens: {
+      loading: true,
+      list: []
     }
   };
   let listEnabled = false;
@@ -50,15 +55,64 @@
     .then((response) => {
       currentProfile.approvedApplications.loading = false;
       currentProfile.approvedApplications.list = response.data;
-    
-      console.log(response.data);
     }).catch((error) => {
       currentProfile.approvedApplications.loading = false;
-
-      console.log('error 1');
-      console.log(error);
     });
   };
+
+  // loadUserTokens
+  function loadUserTokens(token) {
+    currentProfile.tokens = {
+      loading: true,
+      list: {
+        other: [],
+        applications: []
+      }
+    };
+
+    // And now let's make some request call...
+    axios.get(`${$api.url}/account/${token}/tokens`)
+    .then((response) => {
+      let data = response.data;
+      // And now we need to sort all these data...
+
+      // Other's tokens
+      let other = [];
+
+      // Application's tokens
+      let applications = {};
+
+      data.forEach(element => {
+        let registrat = element.data.registrat;
+        if (registrat == null) {
+          registrat = {};
+        };
+
+        if (registrat.id != null) {
+          if (applications[registrat.id] == null) {
+            applications[registrat.id] = [element];
+          } else {
+            applications[registrat.id].push(element);
+          };
+        } else {
+          other.push(element);
+        }
+      });
+
+      currentProfile.tokens.list.other = other;
+      currentProfile.tokens.list.applications = Object.entries(applications);
+      
+      console.log("OTHER TOKENS:");
+      console.log(other);
+
+      console.log("APPLICATION TOKENS:");
+      console.log(Object.entries(applications));
+
+      currentProfile.tokens.loading = false;
+    }).catch((error) => {
+      currentProfile.tokens.loading = false;
+    })
+  }
 
   // findProfile
   // This function will get cached account information
@@ -74,10 +128,18 @@
           list: [],
           loading: true
         };
+        returnProfile.tokens = {
+          list: {
+            other: [],
+            applications: []
+          },
+          loading: true
+        }
 
         currentToken = profile.token;
 
         loadApprovedApplications(profile.token);
+        loadUserTokens(profile.token);
       }
     });
 
@@ -94,7 +156,7 @@
     } else {
       // User needs to be logged in.
       // console.log()
-      // goto('/');
+      goto('/authorize/login');
     };
   };
 
@@ -117,12 +179,9 @@
         user.loadProfiles($user.tokens);
         fullLoading = false;
       } else {
-        console.log('error');
         fullLoading = false;
       };
     }).catch((error) => {
-      console.log(error);
-      console.log(error.response.data);
       fullLoading = false;
     })
   };
@@ -342,6 +401,37 @@
                       loadApprovedApplications(currentToken);
                     }} application={application} time={application.time} currentToken={currentToken} />
                   {/each}
+                { /if }
+              </div>
+            </div>
+          </div>
+
+          <!-- All user tokens -->
+          <div class="w-full px-4 my-4 relative">
+            <div class="w-full h-full rounded-lg bg-white shadow-2xl px-6 py-6">
+              <div class="w-full mb-4 flex justify-center items-center">
+                <div class="text-center">
+                  <h1 class="text-xl text-semibold">Пользовательские токены</h1>
+                  <p class="text-gray-700 text-sm max-w-md">Токены - это простой способ управления аккаунтом. Имея при себе токен пользователя человек может делать с аккаунтом всё что ему захочется.</p>
+                </div>
+                <!-- <p class="text-xs"></p> -->
+              </div>
+
+              <div class="relative">
+                { #if currentProfile.tokens.loading }
+                  <div style="z-index: 2;" class="absolute inset-x-0 top-0 w-full h-full bg-white rounded-b-lg flex justify-center items-center py-6">
+                    <Spinner size="35" />
+                  </div>
+                { /if }
+                { #if currentProfile.tokens.list.length <= 0 }
+                  <div class="flex justify-center items-center mt-4">
+                    <div class="max-w-sm text-center">
+                      <h1 class="text-xl text-semibold text-gray-700">Тут пустовато</h1>
+                      <p class="text-sm text-gray-600">это значит что вы ещё никому не давали доступа!</p>
+                    </div>
+                  </div>
+                { :else }
+                  <TokensScreen otherTokens={currentProfile.tokens.list.other} applicationTokens={currentProfile.tokens.list.applications}></TokensScreen>
                 { /if }
               </div>
             </div>

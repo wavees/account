@@ -14,7 +14,7 @@
   // Let's get user token and then
   // let's do something very interesting...
   const token = cookies.get('_account_token');
-  console.log(token);
+
   if (token != null) {
 		user.setToken(token);
   } else {
@@ -22,14 +22,23 @@
   }
 </script>
 
+<svelte:head>
+	<link rel="stylesheet" href="./fonts/Junegull/junegull.css">
+</svelte:head>
 
-{ #if !$user.loaded }
-	<div style="width: 100%; height: 100vh;" class="bg-white flex justify-center items-center">
-		<Spinner />
-    { $user.error }
-	</div>
-{ :else }
+{ #if $user.loaded } 
 	<main>
 		<slot></slot>
 	</main>
+{ :else }
+	<div style="height: 100vh;" class="w-full flex justify-center items-center">
+		<!-- Branding -->
+		<div class="flex flex-col justify-center items-center">
+			<div class="flex mb-6 items-center">
+				<h1 style="font-family: Junegull" class="text-2xl text-bold">wavees</h1>
+			</div>
+
+			<Spinner size="25" />
+		</div>
+	</div>
 { /if }

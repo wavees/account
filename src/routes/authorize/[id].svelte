@@ -74,14 +74,30 @@
         step = 4;
         loading = false;
       } else {
-        console.log("NO #1");
         // Check if user is logged in. (Check for token);
         if ($user.current.token != null) {
-          console.log("#1");
           // Let's check if we need to instantly
           // send user to application or should
           // we show user disclaimer;
           if (id == "add") return;
+          
+          // Here we'll just redirect user to another page,
+          // if needed
+          if (id == "login") {
+            let returnURL = $page.query.return;
+
+            if (returnURL == null) {
+              window.location.href = "/settings";
+            } else {
+              if (returnURL.includes("@")) {
+                window.location.href = `http://${returnURL}`;
+              } else {
+                window.location.href = `/${returnURL}`;
+              };
+            };
+
+            return;
+          };
 
           axios.get(`${$api.url}/account/${$user.current.token}/applications/${$callback.appId}`)
           .then((response) => {
@@ -205,7 +221,7 @@
   };
 
   callback.subscribe((value) => {
-    if (value.url != null || id == "add") {
+    if (value.url != null || id == "add" || id == "login") {
       loading = false;
 
       defineStep("startup");
@@ -248,10 +264,6 @@
   // Login function. Hm, just logins user!
   // Nothing special
   function login() {
-    console.log("LOGIN STAGE");
-    console.log(tmpUser.email);
-    console.log(tmpUser.pincode);
-
     // Login.
     axios.post(`${$api.url}/user/login`, {
       email: tmpUser.email,
@@ -367,18 +379,10 @@
               expires: moment().add("1", "y").toDate()
             });
             cookies.remove("login-email");
-          }
-          // axios.put(`${$api.url}/accounts/${cookie}`)
+          };
         } else {
           // Procceed to login...
-          console.log("LOGIND USER");
           error.text = null;
-
-          loading = false;
-          user.setToken(data.token);
-
-          // Let's define users's next step...
-          defineStep({ type: "login", data: data });
 
           cookies.set("_account_token", data.token, {
             path: "/",
@@ -386,13 +390,36 @@
             expires: moment().add("1", "y").toDate()
           });
           cookies.remove("login-email");
+
+          // And now we need to choose what to do:
+          // 1. Redirect user to Account Settings page
+
+          // 2. Define new step
+          if (id == "login") {
+            // And now we just need to redirect user to Account
+            // settings page.
+            let returnURL = $page.query.return;
+
+            if (returnURL == null) {
+              window.location.href = "/settings";
+            } else {
+              if (returnURL.includes("@")) {
+                window.location.href = `http://${returnURL}`;
+              } else {
+                window.location.href = `/${returnURL}`;
+              };
+            };
+          } else {
+            loading = false;
+            user.setToken(data.token);
+
+            // Let's define users's next step...
+            defineStep({ type: "login", data: data });
+          }        
         }
       }
     }).catch((err) => {
       loading = false;
-      console.log("UNABLE TO LOGIN");
-      console.log(err);
-
       error.text = "authorization.errors.unableToLogin";
     });
   };
@@ -402,12 +429,7 @@
   // on redirect screen. It'll get new user token
   // and then redirect user to application.
   function redirect(token) {
-    console.log("REDIRECT");
     loading = true;
-
-    console.log($api.url);
-    console.log(id);
-    console.log(token);
 
     axios.get(`${$api.url}/callback/finish/${id}/${token}`)
     .then((response) => {
@@ -415,8 +437,6 @@
 
       window.location.href = `http://${$callback.url}/?token=${data.token}`;
     }).catch((error) => {
-      console.log("ERROR");
-      console.log(error);
       loading = false;
       error.text = "authorization.errors.unableToFinishCallback";
     })
@@ -532,7 +552,6 @@
         }} on:succeed={(e) => {
           tmpUser.pincode = e.detail.pincode;
 
-          console.log("LOGIN #1");
           login();
         }} on:loading={(e) => {
           loading = e.detail;

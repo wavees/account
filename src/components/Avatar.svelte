@@ -25,6 +25,6 @@
       </span>
     </div>
   { :else }
-    <div class="absolute rounded-full" style="z-index:1; background-image: url({avatar}); background-size: cover; background-position: center center; width: {size}em; height: {size}em;"></div>
+    <div class="absolute rounded-full bg-white" style="z-index:1; background-image: url({avatar}); background-size: cover; background-position: center center; width: {size}em; height: {size}em;"></div>
   { /if }
 </div>

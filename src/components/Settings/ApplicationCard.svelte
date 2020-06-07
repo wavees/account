@@ -50,8 +50,7 @@
     axios.get(`${$api.url}/application/${application.appId}`)
     .then((response) => {
       let data = response.data;
-
-      console.log(data);
+ 
       application.logotype = data.logotype;
       application.name = data.name;
     });
