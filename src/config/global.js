@@ -15,9 +15,6 @@ export { general };
 // private API, that was made especially for this site.
 const api = 
 readable({
-  // 
-  applicationToken: "vdS1YTSug6E2",
-
   // API URL and version parameters
   url: "https://api.wavees.co.vu", 
   version: 1

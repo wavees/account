@@ -5,11 +5,20 @@
   // import
 	import { user } from "../config/user.js";
 	
-	import Spinner from "../components/Spinner.svelte";
+	import { colors, theme, Spinner } from "../../../darkmode/src/index"
   import Cookie from "cookie-universal";
 
   // Cookies instance
   const cookies = Cookie();
+
+	// Let's check (and update if needed) our current
+	// theme
+	const currentTheme = cookies.get('_theme');
+
+	theme.setTheme("light");
+	if (currentTheme != null) {
+		theme.setTheme(currentTheme);
+	};
 
   // Let's get user token and then
   // let's do something very interesting...
@@ -31,14 +40,14 @@
 		<slot></slot>
 	</main>
 { :else }
-	<div style="height: 100vh;" class="w-full flex justify-center items-center">
+	<div style="height: 100vh; background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[2]}" class="w-full flex justify-center items-center">
 		<!-- Branding -->
 		<div class="flex flex-col justify-center items-center">
 			<div class="flex mb-6 items-center">
-				<h1 style="font-family: Junegull" class="text-2xl text-bold">wavees</h1>
+				<h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[2]}" class="text-3xl text-bold">wavees</h1>
 			</div>
 
-			<Spinner size="25" />
+			<Spinner />
 		</div>
 	</div>
 { /if }

@@ -1,614 +1,229 @@
 <script>
   // import
-  import { goto } from "@sapper/app";
-  import { stores } from "@sapper/app";
-  import { onMount } from "svelte";
-  
   import { _ } from "svelte-i18n";
-
+  
+  import { onMount } from "svelte";
   import { slide } from "svelte/transition";
 
-  import axios from "axios";
+  import { goto } from "@sapper/app";
+  import { stores } from "@sapper/app";
+
   import Cookie from "cookie-universal";
-  import moment from "moment";
 
-  // Importing some stores.
-  import { api } from "../../config/global.js";
-  import { user } from "../../config/user.js";
-  import { callback } from "../../config/callback.js";
-
-  // Importing components
-  import RoundedButton from "../../components/Buttons/RoundedButton.svelte";
-  import Spinner from "../../components/Spinner.svelte";
-
-  // Importing app screens
-  import EmailScreen from "../../components/Screens/login/email.svelte";
-  import PincodeScreen from "../../components/Screens/login/pincode.svelte";
-  import RegisterScreen from "../../components/Screens/login/register.svelte";
-  import DisclaimerScreen from "../../components/Screens/login/disclaimer.svelte";
-  import ChooserScreen from "../../components/Screens/login/chooser.svelte";
-
-  // Cookies
+  // Cookies manager
   const cookies = Cookie();
 
-  // let's get callback id..
+  // Let's get page store
   const { page } = stores();
-  const { id } = $page.params;
 
-  // Login process step.
+  // Importing pages
+  import EmailInputPage from "../../pages/authorization/EmailInput.svelte";
+  import PincodeInputPage from "../../pages/authorization/PincodeInput.svelte";
+  
+  import RegistrationPage from "../../pages/authorization/RegistrationPage.svelte";
+
+  // Importing components
+  import { 
+    theme, 
+    colors,
     
-  // Should we show loading screen or not?
-  let loading = true;
-  let currentToken = null;
-  let error = {
-    text: null
+    Tile,
+
+    Caption,
+    
+    ProgressIndicator } from "darkmode-components/src/index";
+
+  // Let's import some needed helpers
+  import CheckEmailHelper from "../../helpers/authorization/checkEmail";
+  import PlainRedirectHelper from "../../helpers/authorization/redirect";
+  import CallbackRedirectHelper from "../../helpers/authorization/callback";
+
+  const helpers = {
+    check: {
+      email: CheckEmailHelper
+    },
+
+    redirect: {
+      plain: PlainRedirectHelper,
+      callback: CallbackRedirectHelper
+    }
   };
 
-  // Values:
-  // 0 - null
-  // 1 - Email validation
-  // 2 - Pincode (User is registered) 
-  // 3 - Username (User is not registered)
-  // 4 - Choose account (There are more then one active account
-  //     in this session)
-  // 5 - Callback page;
-  let step = 0;
+  // onMount event
+  // Here we'll determine which authorization step
+  // we need to show. Examples: (email, pincode, user registration
+  // and so on)
+  onMount(() => {
+    checkStep();
+  });
 
-  // defineStep
-  // Function that will define step.
-  // (Yeah, logic)
-  function defineStep(type) {
+  function checkStep () {
     loading = true;
 
-    if (type == "startup") {
-      console.log("STARTUP");
-      // Check if user have another accounts in current session
-      if ($user.tokens.length > 1) {
-        console.log("MORE THAN ONE");
-        // User have more than one account in this session,
-        // so let's show him account chooser screen. (dumb name, I know)
-        user.loadProfiles($user.tokens);
+    let token = cookies.get('_account_token');
+    let id = $page.params.id;
 
-        error.text = null;
+    if (id == "add") {
+      if (step != 2) {
+        token = null;
+      };
+    };
 
-        step = 4;
-        loading = false;
+    if (token) {
+      // Now let's check if we need to
+      // just redirect user, or do we need
+      // to finish callback
+
+      // Just redirect user.
+      if (id == "add" || id == "login" || id == "register") {
+        helpers.redirect.plain();
       } else {
-        // Check if user is logged in. (Check for token);
-        if ($user.current.token != null) {
-          // Let's check if we need to instantly
-          // send user to application or should
-          // we show user disclaimer;
-          if (id == "add") return;
-          
-          // Here we'll just redirect user to another page,
-          // if needed
-          if (id == "login") {
-            let returnURL = $page.query.return;
-
-            if (returnURL == null) {
-              window.location.href = "/settings";
-            } else {
-              if (returnURL.includes("@")) {
-                window.location.href = `http://${returnURL}`;
-              } else {
-                window.location.href = `/${returnURL}`;
-              };
-            };
-
-            return;
-          };
-
-          axios.get(`${$api.url}/account/${$user.current.token}/applications/${$callback.appId}`)
-          .then((response) => {
-            let data = response.data;
-
-            if (data.agreed) {
-              // Let's get new user's token and then redirect
-              // user to callback page...
-              console.log("#8");
-              redirect($user.current.token);
-            } else {
-              error.text = null;
-
-              console.log("#7");
-              step = 5;
-              loading = false;
-            }
-          }).catch(() => {
-            error.text = null;
-
-            console.log("#6");
-            step = 5;
-            loading = false;
-          })
-        } else {
-          console.log("#2");
-          // Check for user email;
-          if (cookies.get('login-email') != null) {
-            // Let's check if user with this email
-            // is registered or not.
-            let email = cookies.get('login-email');
-            tmpUser.email = email;
-
-            axios.get(`${$api.url}/user/check/${email}`)
-            .then((response) => {
-              let data = response.data;
-              // User exists. Let's send our user to
-              // "pincode" page.
-              error.text = null;
-
-              console.log("#3");
-              step = 2;
-              loading = false;
-            })
-            .catch(() => {  
-              error.text = null;
-              console.log("#4");
-
-              step = 1;
-              loading = false;
-            });
-          } else {
-            error.text = null;
-            
-            console.log("#5");
-            step = 1;
-            loading = false;
-          };
-        }
+      // Finish callback and then redirect.
+        helpers.redirect.callback()
       }
     } else {
-      // Defining user's next step...
-      if (type.type == "emailChanged") {
-        let data = type.data;
+      // And now we need to check if user already
+      // wrote his email or no.
+      let email = cookies.get('_login_email');
 
-        // User is registered:
-        // show him pincode screen;
-        if (data.userExists == true) {
-          error.text = null;
-
-          step = 2;
-          loading = false;
-        // User doesn't exist:
-        // show him register screen;
-        } else {
-          error.text = null;
-
-          step = 3;
-          loading = false;
-        }
-      } else if (type.type == "login") {
-        console.log("LOGIN DEFINED");
-        // Let's check if we need to redirect user
-        // instantly or we need to show Redirect Screen.
-        currentToken = type.data.token;
-
-        console.log(currentToken);
-
-        axios.get(`${$api.url}/account/${type.data.token}/applications/${$callback.appId}}`)
+      if (email) {
+        // Here we'll check user's email
+        helpers.check.email(email)
         .then((response) => {
-          let data = response.data;
-          console.log(data);
-          
-          if (data.agreed) {
-            console.log("REDIRECT");
-            redirect(type.data.token);
+          // User exists, so we just need to authorize
+          // user. So we let's show him pincode page
+          if (response.exists) {
+            step = 2;
+            loading = false;
           } else {
-            error.text = null;
-
-            step = 5;
+          // User doesn't exists, so let's show him registration
+          // screen.
+            step = 4;
             loading = false;
           }
-        }).catch(() => {
-          error.text = null;
-
-          step = 5;
-          loading = false;
-        })
-      } else if (type.type == "register") {
-        // Let's redirect user to pincode page.
-        // User need to write his pincode to
-        // continue;
-        error.text = null;
-
-        step = 2;
-        loading = false;
-      };
-
-      // Hide loading screen;
-    }
-  };
-
-  callback.subscribe((value) => {
-    if (value.url != null || id == "add" || id == "login") {
-      loading = false;
-
-      defineStep("startup");
-    }});
-
-  // User object (Saves temporary user data (Applies in registration step))
-
-  let tmpUser = {
-    email: null,
-    username: null,
-
-    pincode: null
-  };
-
-  // register
-  // Register function. Just registers our user!
-  // It's so easy, yeah
-  function register() {
-    // Register user...
-    axios.post(`${$api.url}/user/register`, {
-      email: tmpUser.email,
-      username: tmpUser.email
-    })
-    .then((response) => {
-      let data = response.data;
-
-      if (data.error == null) {
-        // User registered...
-        loading = false;
-        // Let's define user's next step
-        defineStep({ type: "register", data: data });
-      };
-    }).catch(() => {
-      loading = false;
-      error.text = "authorization.errors.unableToRegister";
-    })
-  };
-
-  // login
-  // Login function. Hm, just logins user!
-  // Nothing special
-  function login() {
-    // Login.
-    axios.post(`${$api.url}/user/login`, {
-      email: tmpUser.email,
-      pincode: tmpUser.pincode
-    })
-    .then((response) => {
-      let data = response.data;
-
-      if (data.token != null) {
-        // Let's check if user want to add another account
-        // to this session or if he want to login.
-
-        if (id == "add") {
-          // Let's check if current token is session token
-          // or if it's an user token.
-          let token = cookies.get('_account_token', { domain: "wavees.co.vu" });
-
-          if (token != null) {
-            // Now we need to check if it's an user
-            // token or it's a session token
-            axios.get(`${$api.url}/account/${token}`)
-            .then((response) => {
-              let account = response.data;
-
-              // And now let's check the type of
-              // this token.
-              if (account.type == "user") {
-                // It's an user token, so we
-                // need to create new session.
-                let query = {
-                  profiles: [
-                    token,
-                    data.token
-                  ]
-                }
-
-                // Make post request.
-                axios.post(`${$api.url}/account`, query)
-                .then((response) => {
-                  let data = response.data;
-
-                  // Check if we need to return user to
-                  // some callback
-                  if ($page.query.return != null) {
-                    if ($page.query.return.includes("@")) {
-                      window.location.href = `http://${$page.query.return}`;
-                    } else {
-                      window.location.href = `/${$page.query.return}`;
-                    };
-                  } else {
-                    window.location.href = "/";
-                  }
-
-                  if (data.token != null) {
-                    cookies.set("_account_token", data.token, {
-                      path: "/",
-                      domain: "wavees.co.vu",
-                      expires: moment().add("1", "y").toDate()
-                    });
-
-                    cookies.remove('login-email');
-                  };
-                }).catch((error) => {
-                  loading = false;
-                  error.text = "authorization.errors.unableToRegisterSession";
-                });
-              } else if (account.type == "session") {
-                // It's a session token, and so
-                // we just need to add new token
-                // to this session.
-                axios.put(`${$api.url}/account/${token}/${data.token}`)
-                .then((response) => {
-                  let data = response.data;
-
-                  // Here we just need to redirect
-                  // user.
-                  if ($page.query.return != null) {
-                    if ($page.query.return.includes("@")) {
-                      window.location.href = `http://${$page.query.return}`;
-                    } else {
-                      window.location.href = `/${$page.query.return}`;
-                    };
-                  } else {
-                    window.location.href = "/";
-                  }
-
-                  cookies.remove('login-email');
-                }).catch((error) => {
-                  loading = false;
-                  error.text = "authorization.errors.unableToAddAccount";
-                })
-              } else {
-                loading = false;
-                error.text = "authorization.errors.unableToRegisterSession";
-              }
-            }).catch((error) => {
-              loading = false;
-              error.text = "authorization.errors.unableToRegisterSession";
-            });
-          } else {
-            // Procceed to login...
-            error.text = null;
-
-            loading = false;
-            user.setToken(data.token);
-
-            // Let's define users's next step...
-            defineStep({ type: "login", data: data });
-
-            cookies.set("_account_token", data.token, {
-              path: "/",
-              domain: "wavees.co.vu",
-              expires: moment().add("1", "y").toDate()
-            });
-            cookies.remove("login-email");
+        }).catch((error) => {
+          // Error occured, so email doesn't even exists.
+          if (error == "InvalidEmail") {
+            changeError(error);
           };
-        } else {
-          // Procceed to login...
-          error.text = null;
-
-          cookies.set("_account_token", data.token, {
-            path: "/",
-            // domain: "wavees.co.vu",
-            expires: moment().add("1", "y").toDate()
-          });
-          cookies.remove("login-email");
-
-          // And now we need to choose what to do:
-          // 1. Redirect user to Account Settings page
-
-          // 2. Define new step
-          if (id == "login") {
-            // And now we just need to redirect user to Account
-            // settings page.
-            let returnURL = $page.query.return;
-
-            if (returnURL == null) {
-              window.location.href = "/settings";
-            } else {
-              if (returnURL.includes("@")) {
-                window.location.href = `http://${returnURL}`;
-              } else {
-                window.location.href = `/${returnURL}`;
-              };
-            };
-          } else {
-            loading = false;
-            user.setToken(data.token);
-
-            // Let's define users's next step...
-            defineStep({ type: "login", data: data });
-          }        
-        }
+        })
+      } else {
+        // We need to show login page...
+        step = 1;
+        loading = false;
       }
-    }).catch((err) => {
-      loading = false;
-      error.text = "authorization.errors.unableToLogin";
-    });
-  };
-
-  // redirect 
-  // Fired when user presses the "I agree" button
-  // on redirect screen. It'll get new user token
-  // and then redirect user to application.
-  function redirect(token) {
-    loading = true;
-
-    axios.get(`${$api.url}/callback/finish/${id}/${token}`)
-    .then((response) => {
-      let data = response.data;
-
-      window.location.href = `http://${$callback.url}/?token=${data.token}`;
-    }).catch((error) => {
-      loading = false;
-      error.text = "authorization.errors.unableToFinishCallback";
-    })
-  };
-
-  // onMount
-  // Function, that is called when our page
-  // loads. Here we'll get some information
-  // about our callback. 
-  onMount(() => {
-    if (id == "add") {
-      user.clearStore();
-      callback.setLoaded(true);
-    } else {
-      callback.retrieve(id);
     }
-  });
+  };
+
+  // Function, that'll help us to change
+  // step and loading state directly from
+  // our components.
+  function changeStep(stepNumber, loadingState = false) {
+    step = stepNumber;
+    loading = loadingState;
+  };
+
+  // Function, that'll handle errors
+  function changeError(errorMessage) {
+    console.log(errorMessage);
+    error = errorMessage;
+
+    loading = false;
+  };
+
+  // Authorization steps
+  let step = 0;
+  let loading = true;
+
+  // And errors
+  let error = null;
+
+  // Progress items
+  let progressItems = [
+    {
+      title: "Ввод почты"
+    },
+    {
+      title: "Авторизация"
+    },
+    {
+      title: "Последний штрих!"
+    }
+  ];
 </script>
 
-<!-- 
-  Header
- -->
-
 <svelte:head>
-  <title>Wavees Authorization</title>
+	<link rel="stylesheet" href="./fonts/Junegull/junegull.css">
+  <title>Wavees Auth</title>
 </svelte:head>
 
-<div style="background-image: url('background.png'); background-size: cover; background-position: center center; overflow: hidden; width: 100%; height: 100vh;" class="flex flex-col justify-center items-center relative">
-
+<main style="background-image: url('{$theme == "dark" ? "background-dark.png" : "background-light.png"}'); background-size: cover; background-position: center center; min-height: 100vh; background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[4]}" class="w-full flex flex-col justify-center items-center">
+  <!-- Company "logo" -->
+  <div class="w-full flex mb-6 text-center flex justify-center items-center">
+		<h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[2]}" class="text-3xl text-bold">wavees</h1>
+	</div>
+  
   <!-- 
-    @section container
-   -->
-  <div class="{ error.text != null ? "rounded-t-lg" : "rounded-lg"} bg-white relative mx-4 md:mx-0 w-full md:max-w-md shadow-xl">
-    { #if loading }
-      <div style="z-index: 3;" class="w-full h-full absolute flex justify-center items-center bg-white">
-        <Spinner size="30" />
-      </div>
-    { /if }
-
-    <!-- 
-      Header
-     -->
-    <div class="w-full py-4 flex justify-around items-center bg-gray-100">
-      <!-- 1: email
-        IDS: 1 -->
-      <div class="flex items-center {step == 1 ? "font-semibold" : ""}">
-        <div style="width: 1.8em; height: 1.8em;" class="flex justify-center text-center items-center text-sm rounded-full {step == 1 ? "bg-blue-600 text-white" : "bg-gray-300"}">
-          { #if step > 1 }
-            <div>
-              <img style="width: 1.3em; height: 1.3em;" src="./icons/check.svg" alt="Checkmark">
-            </div>
-          { :else }
-            1.
-          { /if }
-        </div>
-        <p class="mx-2 text-xs">Ввод почты</p>
-      </div>
-
-      <!-- 2: pincode vs register
-        IDS: 2,3 -->
-      <div class="flex items-center {step == 2 || step == 3 || step == 4 ? "font-semibold" : ""}">
-        <div style="width: 1.8em; height: 1.8em;" class="flex justify-center text-center items-center text-sm rounded-full {step == 2 || step == 3 || step == 4 ? "bg-blue-600 text-white" : "bg-gray-300"}">
-          { #if step > 4 }
-            <div>
-              <img style="width: 1.3em; height: 1.3em;" src="./icons/check.svg" alt="Checkmark">
-            </div>
-          { :else }
-            2.
-          { /if }
-        </div>
-        <p class="mx-2 text-xs">{ step == 4 ? "Выбор аккаунта" : step == 3 ? "Регистрация" : "Авторизация" }</p>
-      </div>
-
-      <!-- 3: redirect
-        IDS:  -->
-      <div class="flex items-center {step == 5 ? "font-semibold" : ""}">
-        <div style="width: 1.8em; height: 1.8em;" class="flex justify-center text-center items-center text-sm rounded-full {step == 5 ? "bg-blue-600 text-white" : "bg-gray-300"}">
-          3.
-        </div>
-        <p class="mx-2 text-xs">Последний штрих!</p>
-      </div>
-    </div>
-
-    <!-- 
-      Different screens
-     -->
-    <div class="w-full h-full px-4 py-4">
-
-      { #if step == 0 }
-        <div class="text-center">
-          <h1 class="text-xl">We're trying to identify you.</h1>
-          <p class="text-sm">If you still see this message - try refreshing your page.</p>
-
-          <RoundedButton on:click={(e) => { location.reload() }} classes="mt-6">
-            👌 Ok, refresh it for me 
-          </RoundedButton>
-        </div>
-      { :else if step == 1 }
-        <EmailScreen bind:email={tmpUser.email} on:changeStep={(e) => {
-          step = e.detail;
-        }} on:loading={(e) => {
-          loading = e.detail;
-        }} on:succeed={(e) => {
-          tmpUser.email = e.detail.email;
-
-          defineStep({ type: "emailChanged", data: e.detail });
-        }} on:error={(e) => {
-          error.text = e.detail;
-        }} />
-      { :else if step == 2 } 
-        <PincodeScreen email={tmpUser.email} on:changeStep={(e) => {
-          step = e.detail;
-        }} on:succeed={(e) => {
-          tmpUser.pincode = e.detail.pincode;
-
-          login();
-        }} on:loading={(e) => {
-          loading = e.detail;
-        }} on:error={(e) => {
-          error.text = e.detail;
-        }} />
-      { :else if step == 3 }
-        <RegisterScreen bind:username={tmpUser.username} on:changeStep={(e) => {
-          step = e.detail;
-        }} on:succeed={(e) => {
-          tmpUser.username = e.detail.username;
-
-          register();
-        }} on:loading={(e) => {
-          loading = e.detail;
-        }} on:error={(e) => {
-          error.text = e.detail;
-        }} />
-      { :else if step == 4 }
-        <ChooserScreen on:succeed={(e) => {
-          defineStep({ type: "login", data: e.detail });
-        }} on:error={(e) => {
-          error.text = e.detail;
-        }} />
-      { :else if step == 5 }
-        <DisclaimerScreen on:succeed={(e) => {
-          if (currentToken == null) {
-            currentToken = cookies.get("_account_token", { domain: "wavees.co.vu" });
-          };
-          redirect(currentToken);
-        }} on:error={(e) => {
-          error.text = e.detail;
-        }} email={tmpUser.email} />
-      { /if }
-    </div>
-  </div>
-
-  <!-- 
-    Error box
-    Appears when error is occured and
-    disappers somehow..
+    Authorization tile 
+    @page EmailInput
   -->
 
-  { #if error.text != null }
-    <div in:slide out:slide class="rounded-b-lg mx-4 w-full md:max-w-md bg-gray-200 flex justify-start items-center px-2 md:px-6 py-4 md:py-6">
-      <!-- 
-        Icon here
-      -->
-      <img style="width: 1.8em; height: 1.8em;" src="./icons/alert-triangle.svg" alt="Alert icon">
-
-      <!-- 
-        And text here 
-      -->
-      <div class="mx-4">
-        <h1 class="text-xl text-semibold">Произошла ошибка</h1>
-        <p class="text-gray-700">{$_(error.text, { default: "Unrecognized error message" })}</p>
-      </div>
+  <Tile {loading} size="medium">
+    <!-- Progress indicator -->
+    <div class="mb-8 mx-4">
+      <ProgressIndicator current={step == 4 ? 2 : step} items={progressItems} />
     </div>
-  { /if }
-</div>
+
+    <!-- Tile content -->
+
+    <!-- 
+      @step Email Validation
+      Here user need to write down his email,
+      and then, we'll validate it.
+     -->
+    {#if step == 1}
+      <EmailInputPage on:step={(e) => {
+        changeStep(e.detail.step, e.detail.loading);
+      }} on:check={(e) => {
+        checkStep();
+      }} on:error={(e) => {
+        changeError(e.detail);
+      }} />
+    <!-- 
+      @step Pincode Validation
+      Just another screen for user validation.
+      Here user just need to write down
+      his pincode and login to his account.
+     -->
+    { :else if step == 2 }
+      <PincodeInputPage on:step={(e) => {
+        changeStep(e.detail.step, e.detail.loading);
+      }} on:check={(e) => {
+        checkStep();
+      }} on:error={(e) => {
+        changeError(e.detail);
+      }} />
+    
+    <!-- 
+      @step User Registration
+      Just another user registration page...
+      I think thah'll it be very compilcated and very good-looking
+     -->
+    { :else if step == 4 }
+      <RegistrationPage on:step={(e) => {
+        changeStep(e.detail.step, e.detail.loading);
+      }} on:check={(e) => {
+        checkStep();
+      }} on:error={(e) => {
+        changeError(e.detail);
+      }} />
+    {/if}
+  </Tile>
+
+  <!-- Error status -->
+  {#if error != null}
+    <div transition:slide class="py-4">
+      <Caption>{$_(error, { default: error })}</Caption>
+    </div>
+  {/if}
+</main>

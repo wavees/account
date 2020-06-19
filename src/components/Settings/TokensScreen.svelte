@@ -29,13 +29,13 @@
 <!-- 
   OTHER TOKENS
  -->
-<div class="w-full">
+<div class="w-full mt-6">
   <!-- Other's header -->
-  <div class="w-full flex justify-start px-6 py-4 bg-gray-200">
+  <div class="w-full flex justify-start px-6 py-4">
     <h1 class="text-xl font-semibold">Другие:</h1>
   </div>
 
-  <div class="px-4">
+  <div class="px-2 md:px-6">
     {#each otherTokens as token}
       <Entry {token}></Entry>
     {/each}

@@ -20,6 +20,8 @@
   import ApplicationCard from "../components/Settings/ApplicationCard.svelte"
   import AvatarCard from "../components/Settings/AvatarCard.svelte";
 
+  import ProfileNameCard from "../components/Settings/ProfileNameCard.svelte";
+
   // Icons
   import Delete from "../components/Icons/Delete.svelte";
   import ThumbsDown from "../components/Icons/ThumbsDown.svelte";
@@ -101,12 +103,6 @@
 
       currentProfile.tokens.list.other = other;
       currentProfile.tokens.list.applications = Object.entries(applications);
-      
-      console.log("OTHER TOKENS:");
-      console.log(other);
-
-      console.log("APPLICATION TOKENS:");
-      console.log(Object.entries(applications));
 
       currentProfile.tokens.loading = false;
     }).catch((error) => {
@@ -259,8 +255,12 @@
       <h1 style="font-family: Junegull;" class="text-xl">WAVEES</h1>
 
       <div class="hidden md:flex items-center text-xs">
-        <TransparentButton classes="mx-1">Про сервис</TransparentButton>
-        <TransparentButton classes="mx-1">Компания</TransparentButton>
+        <TransparentButton on:click={(e) => { 
+          goto('/');
+        }} classes="mx-1">Про сервис</TransparentButton>
+        <TransparentButton on:click={(e) => {
+          window.location.href = "https://company.wavees.co.vu";
+        }} classes="mx-1">Компания</TransparentButton>
 
         <LogoutButton />
       </div>
@@ -336,7 +336,7 @@
           window.location.href = `/authorize/add?return=settings`;
         }} style="cursor: pointer" class="my-4 bg-gray-100 hover:bg-gray-300 bg-white w-full flex justify-start py-4 px-4 md:px-8 rounded-lg">
           <div class="flex">
-            <img style="width: 2.5em; height: 2.5em;" class="mt-1" src="./icons/plus.svg" alt="Add icon">
+            <img src="./icons/plus.svg" alt="Add icon">
             
             <div class="ml-4">
               <h1 class="text-semibold">Добавить аккаунт</h1>
@@ -363,11 +363,8 @@
           }} avatar={currentProfile.avatar} username={currentProfile.username} />
 
           <!-- Profile name -->
-          <div class="w-full md:w-1/2 px-4 my-4 relative">
-            <div class="w-full h-full rounded-lg bg-white shadow-2xl px-4 py-6">
-              {currentProfile.username}
-            </div>
-          </div>
+          <ProfileNameCard>
+          </ProfileNameCard>
 
           <!-- Approved applications -->
           <div class="w-full px-4 my-4 relative">
@@ -398,6 +395,7 @@
                     <ApplicationCard on:loading={(e) => {
                       currentProfile.approvedApplications.loading = e.detail;
                     }} on:update={(e) => {
+                      loadUserTokens(currentToken);
                       loadApprovedApplications(currentToken);
                     }} application={application} time={application.time} currentToken={currentToken} />
                   {/each}

@@ -31,17 +31,17 @@
   export let tokens = [];
 </script>
 
-<div class="w-full">
-  <div class="w-full flex justify-start px-6 py-4 bg-gray-200 items-center">
+<div class="w-full mt-6">
+  <div class="w-full flex justify-start px-6 py-4 items-center">
     <Avatar username={appId} avatar={application.logotype} />
     
     <div class="mx-4">
       <h1 class="text-xl font-semibold">{application.name}</h1>
-      <p class="text-sm">Вы дали доступ данному приложению</p> 
+      <p class="text-sm">Все токены данного приложения:</p> 
     </div>
   </div>
 
-  <div class="px-4">
+  <div class="px-2 md:px-6">
     {#each tokens as token}
       <Entry {token}></Entry>
     {/each}

@@ -37,7 +37,7 @@
     action = null;
 
     if (currentToken != null) {
-      axios.delete(`${$api.url}/account/${currentToken}/application/${application.registrat.url}`)
+      axios.delete(`${$api.url}/account/${currentToken}/application/${application.appId}`)
       .then((response) => {
         dispatch("update");
       }).catch((error) => {
