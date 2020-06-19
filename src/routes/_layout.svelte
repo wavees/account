@@ -5,7 +5,7 @@
   // import
 	import { user } from "../config/user.js";
 	
-	import { colors, theme, Spinner } from "../../../darkmode/src/index"
+	import { colors, theme, Spinner } from "darkmode-components/src/index"
   import Cookie from "cookie-universal";
 
   // Cookies instance
