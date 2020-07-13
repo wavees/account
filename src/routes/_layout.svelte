@@ -3,7 +3,7 @@
   import Tailwind from "../styles/tailwind.svelte";
 
   // import
-	import { user } from "../config/user.js";
+	import { user } from "../config/stores/user.js";
 	
 	import { colors, theme, Spinner } from "darkmode-components/src/index"
   import Cookie from "cookie-universal";

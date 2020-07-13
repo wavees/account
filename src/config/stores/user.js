@@ -2,7 +2,7 @@
 import { writable } from "svelte/store";
 import axios from "axios";
 
-const api = "https://localhost:3003/v1"
+import { url, version } from "../application/api";
 
 // 
 // func createUserStore()
@@ -17,6 +17,7 @@ function createUserStore() {
     error: null,
 
     current: {
+      id: null,
       token: null,
       email: null,
       username: null,
@@ -56,7 +57,7 @@ function createUserStore() {
     // and store it in current object)
     setToken: (token) => {
       // Let's get that user object..
-      axios.get(`${api}/account/${token}`)
+      axios.get(`${url}/${version}/account/${token}`)
       .then((response) => {
         let data = response.data;
 
@@ -67,6 +68,7 @@ function createUserStore() {
           update((object) => {
             object.loaded = true;
 
+            object.current.id       = data.uid;
             object.current.token    = token;
             object.current.email    = data.email;
             object.current.username = data.username;
@@ -91,12 +93,13 @@ function createUserStore() {
           // our store with new data.
           let currentToken = data.current.token == null ? data.profiles[0] : data.current.token;
 
-          axios.get(`${api}/account/${currentToken}`)
+          axios.get(`${url}/${version}/account/${currentToken}`)
           .then((response) => {
             let data = response.data;
 
             // And now let's populate our store with new data
             update((object) => {
+              object.current.id       = data.uid;
               object.current.token    = currentToken;
               object.current.email    = data.email;
               object.current.username = data.username;
@@ -171,7 +174,7 @@ function createUserStore() {
 const user = createUserStore();
 
 async function loadProfile(token) {
-  axios.get(`${api}/account/${token}`)
+  axios.get(`${url}/${version}/account/${token}`)
   .then((response) => {
     let data = response.data;
 
@@ -201,3 +204,66 @@ async function loadProfile(token) {
 };
 
 export { user };
+
+// 
+// func createCurrentUserStore()
+// This function will create
+// store for currently viewed
+// user. And this store, by the
+// way, will store all needed information
+// about this user.
+function createCurrentUserStore() {
+  // Main store structure
+  let store = {
+    username: null,
+
+    email: null,
+    avatar: null,
+  
+    uid: null,
+
+    loaded: false
+  };
+
+  // Let's now get some 
+  const { subscribe, set, update } = writable(store);
+
+  return {
+    subscribe,
+
+    // loadProfile
+    // This function will
+    // load user profile
+    // and store it in this
+    // store.
+    loadProfile: (uid) => {
+      // And now let's try to fetch some information
+      // about this account...
+      axios.get(`${url}/${version}/user/${uid}`)
+      .then((response) => {
+        let data = response.data;
+
+        update((object) => {
+          object.username = data.username;
+          object.email    = data.email;
+          object.avatar   = data.avatar;
+          object.uid      = uid;
+
+          object.loaded   = true;
+
+          return object;
+        });
+      }).catch(() => {
+        update((object) => {
+          object.loaded = true;
+
+          return object;
+        })
+      });
+    }
+  }
+};
+
+const current = createCurrentUserStore();
+
+export { current };

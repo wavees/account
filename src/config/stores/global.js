@@ -1,10 +1,17 @@
 import { readable, writable } from 'svelte/store';
 
+// Let's firstly import global api config.
+import { 
+  url as apiURL, 
+  version as apiVersion 
+} from "../application/api";
+
 const general =
 readable({
   // Site url
   // Hmm, just site url, isn't it?
-  url: "wavees.co.vu"
+  globalURL: "wavees.co.vu",
+  currentURL: "account.wavees.co.vu"
 });
 
 export { general };
@@ -16,8 +23,8 @@ export { general };
 const api = 
 readable({
   // API URL and version parameters
-  url: "https://api.wavees.co.vu/v1",
-  version: 1
+  url: apiURL,
+  version: apiVersion
 });
 
 export { api };

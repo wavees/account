@@ -31,7 +31,7 @@
 
     Caption,
     
-    ProgressIndicator } from "darkmode-components/src/index";
+    Spinner } from "darkmode-components/src/index";
 
   // Let's import some needed helpers
   import CheckEmailHelper from "../../helpers/authorization/checkEmail";
@@ -57,10 +57,10 @@
     checkStep();
   });
 
-  function checkStep () {
+  function checkStep (currentToken) {
     loading = true;
 
-    let token = cookies.get('_account_token');
+    let token = currentToken || cookies.get('_account_token');
     let id = $page.params.id;
 
     if (id == "add") {
@@ -79,7 +79,7 @@
         helpers.redirect.plain();
       } else {
       // Finish callback and then redirect.
-        helpers.redirect.callback()
+        helpers.redirect.callback(token)
       }
     } else {
       // And now we need to check if user already
@@ -125,7 +125,6 @@
 
   // Function, that'll handle errors
   function changeError(errorMessage) {
-    console.log(errorMessage);
     error = errorMessage;
 
     loading = false;
@@ -137,19 +136,6 @@
 
   // And errors
   let error = null;
-
-  // Progress items
-  let progressItems = [
-    {
-      title: "Ввод почты"
-    },
-    {
-      title: "Авторизация"
-    },
-    {
-      title: "Последний штрих!"
-    }
-  ];
 </script>
 
 <svelte:head>
@@ -171,11 +157,20 @@
     
     <!-- Tile -->
       <!-- 
+        @step Loading
+        Just a loading sceen,
+        nothing special. 
+      -->
+      { #if step == 0 }
+        <div>
+          <Spinner />
+        </div>
+      <!-- 
         @step Email Validation
         Here user need to write down his email,
         and then, we'll validate it.
       -->
-      {#if step == 1}
+      { :else if step == 1}
         <EmailInputPage on:step={(e) => {
           changeStep(e.detail.step, e.detail.loading);
         }} on:check={(e) => {

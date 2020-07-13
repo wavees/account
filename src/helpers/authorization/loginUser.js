@@ -1,11 +1,13 @@
 // Import
 import axios from "axios"
-import { api, version } from "./config.js";
+
+// Importing config, yeah.
+import { url, version } from "../../config/application/api";
 
 export default (email, pincode, type = "ordinary", session) => {
   return new Promise((resolve, reject) => {
     // Let's try to login our user...
-    axios.post(`${api}/${version}/user/login`,
+    axios.post(`${url}/${version}/user/login`,
     {
       email: email,
       pincode: pincode
@@ -30,14 +32,14 @@ export default (email, pincode, type = "ordinary", session) => {
           if (session == null) {
             reject({ error: "InvalidSession" });
           } else {
-            axios.get(`${api}/${version}/account/${session}`)
+            axios.get(`${url}/${version}/account/${session}`)
             .then((response) => {
               let account = response.data;
 
               // Here we just need to add new token
               // to existing session.
               if (account.type == "session") {
-                axios.put(`${api}/${version}/account/${session}/${data.token}`)
+                axios.put(`${url}/${version}/account/${session}/${data.token}`)
                 .then((response) => {
                   let session = response.data;
 
@@ -53,7 +55,7 @@ export default (email, pincode, type = "ordinary", session) => {
               // And here we just need to create new
               // session with this two tokens.
               } else if (account.type == "user") {
-                axios.post(`${api}/${version}/account`, {
+                axios.post(`${url}/${version}/account`, {
                   profiles: [
                     session,
                     data.token
@@ -66,7 +68,7 @@ export default (email, pincode, type = "ordinary", session) => {
                   } else {
                     reject({ error: "UnableToRegisterSession" });
                   }
-                }).catch((error) => {
+                }).catch(() => {
                   reject({ error: "UnableToRegisterSession" });
                 });
               } else {

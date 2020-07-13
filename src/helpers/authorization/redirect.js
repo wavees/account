@@ -16,7 +16,7 @@ export default () => {
         window.location.href = returnURL;
       }
     } else {
-      window.location.href = "/settings";
+      window.location.href = "/";
     }
   });
 };

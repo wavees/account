@@ -1,7 +1,7 @@
 <script>
   // import
   import { _ } from "svelte-i18n";
-  import { api } from "../../config/global.js";
+  import { api } from "../../config/stores/global.js";
 
   import axios from "axios";
 
@@ -103,7 +103,7 @@
     // Let's get user's email...
     email = cookies.get('_login_email');
 
-    axios.get(`${$api.url}/user/check/${email}`)
+    axios.get(`${$api.url}/${$api.version}/user/check/${email}`)
     .then((response) => {
       let data = response.data;
       loaded = true;
@@ -141,20 +141,37 @@
     // @warning! This is very dumb realization,
     // but it works! And it works perfectly!
     // Somehow.
-    let currentID = e.originalTarget.id;
+    let currentID = e.target.id;
 
     // Let's now determine the type of
     // this keypress.
 
     let type;
-    if (e.keyCode === 37) {
-      type = "backspace";
-    } else if (e.keyCode === 8) {
-      type = "nothing";
-    } else {
-      type = "normal" 
-    };
 
+    // Firstly we need to check all keycodes
+    let blockedKeys = [
+      27,
+      192,
+      9,
+      20,
+      16,
+      17,
+      38,
+      39
+    ];
+    
+    if (!blockedKeys.includes(e.keyCode)) {
+      if (e.keyCode === 37) {
+        type = "backspace";
+      } else if (e.keyCode === 8) {
+        type = "nothing";
+      } else {
+        type = "normal" 
+      };
+    }
+
+    // And now let's determine our next
+    // input...
     let focus;
 
     switch (currentID) {
@@ -272,10 +289,10 @@
   <!-- Content -->
   <div class="mt-12 w-full flex flex-col justify-center items-center px-2 md:px-8 lg:px-16">
     <div style="{$theme == "light" ? "color: #000;" : "color: #fff;"}" class="items-center text-center">
-      <input id="pincode-start" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
-      <input id="pincode-2" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
-      <input id="pincode-3" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
-      <input id="pincode-4" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+      <input id="pincode-start" type="text" maxlength="1" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+      <input id="pincode-2" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+      <input id="pincode-3" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+      <input id="pincode-4" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
     </div>
 
     <!-- Buttons -->

@@ -3,9 +3,6 @@
 	import { goto } from "@sapper/app";
 
 	// Importing components
-	import RoundedButton from "../components/Buttons/RoundedButton.svelte";
-	import TransparentButton from "../components/Buttons/TransparentButton.svelte";
-
 	export let status;
 	export let error;
 
@@ -26,13 +23,7 @@
 		</div>
 
 		<div class="flex w-full justify-center">
-			<RoundedButton classes="mx-2" on:click={(e) => { goto('/') }}>
-				😥 Go home
-			</RoundedButton>
 
-			<TransparentButton classes="mx-2" on:click={(e) => { location.reload() }}>
-				Retry
-			</TransparentButton>
 		</div>
 	</div>
 </div>
