@@ -16,7 +16,7 @@ export { general };
 const api = 
 readable({
   // API URL and version parameters
-  url: "https://api.wavees.co.vu", 
+  url: "localhost:3003/v1",
   version: 1
 });
 

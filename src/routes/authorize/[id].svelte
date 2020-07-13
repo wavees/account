@@ -157,73 +157,73 @@
   <title>Wavees Auth</title>
 </svelte:head>
 
-<main style="background-image: url('{$theme == "dark" ? "background-dark.png" : "background-light.png"}'); background-size: cover; background-position: center center; min-height: 100vh; background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[4]}" class="w-full flex flex-col justify-center items-center">
-  <!-- Company "logo" -->
-  <div class="w-full flex mb-6 text-center flex justify-center items-center">
-		<h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[2]}" class="text-3xl text-bold">wavees</h1>
-	</div>
-  
+<main class="flex h-full items-center max-w-full">
   <!-- 
-    Authorization tile 
-    @page EmailInput
+
   -->
-
-  <Tile {loading} size="medium">
-    <!-- Progress indicator -->
-    <div class="mb-8 mx-4">
-      <ProgressIndicator current={step == 4 ? 2 : step} items={progressItems} />
+  <div style="background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[4]}" class="relative h-full w-full lg:w-2/3 flex flex-col justify-center items-center">
+    <!-- 
+      Wavees Authorization logotype
+     -->
+    <div class="text-center py-4 px-6 absolute inset-x-0 top-0">
+      <h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[1]}" class="text-1xl text-bold">wavees</h1>
     </div>
-
-    <!-- Tile content -->
-
-    <!-- 
-      @step Email Validation
-      Here user need to write down his email,
-      and then, we'll validate it.
-     -->
-    {#if step == 1}
-      <EmailInputPage on:step={(e) => {
-        changeStep(e.detail.step, e.detail.loading);
-      }} on:check={(e) => {
-        checkStep();
-      }} on:error={(e) => {
-        changeError(e.detail);
-      }} />
-    <!-- 
-      @step Pincode Validation
-      Just another screen for user validation.
-      Here user just need to write down
-      his pincode and login to his account.
-     -->
-    { :else if step == 2 }
-      <PincodeInputPage on:step={(e) => {
-        changeStep(e.detail.step, e.detail.loading);
-      }} on:check={(e) => {
-        checkStep();
-      }} on:error={(e) => {
-        changeError(e.detail);
-      }} />
     
-    <!-- 
-      @step User Registration
-      Just another user registration page...
-      I think thah'll it be very compilcated and very good-looking
-     -->
-    { :else if step == 4 }
-      <RegistrationPage on:step={(e) => {
-        changeStep(e.detail.step, e.detail.loading);
-      }} on:check={(e) => {
-        checkStep();
-      }} on:error={(e) => {
-        changeError(e.detail);
-      }} />
-    {/if}
-  </Tile>
+    <!-- Tile -->
+      <!-- 
+        @step Email Validation
+        Here user need to write down his email,
+        and then, we'll validate it.
+      -->
+      {#if step == 1}
+        <EmailInputPage on:step={(e) => {
+          changeStep(e.detail.step, e.detail.loading);
+        }} on:check={(e) => {
+          checkStep();
+        }} on:error={(e) => {
+          changeError(e.detail);
+        }} />
+      <!-- 
+        @step Pincode Validation
+        Just another screen for user validation.
+        Here user just need to write down
+        his pincode and login to his account.
+      -->
+      { :else if step == 2 }
+        <PincodeInputPage on:step={(e) => {
+          changeStep(e.detail.step, e.detail.loading);
+        }} on:check={(e) => {
+          checkStep();
+        }} on:error={(e) => {
+          changeError(e.detail);
+        }} />
+      
+      <!-- 
+        @step User Registration
+        Just another user registration page...
+        I think thah'll it be very compilcated and very good-looking
+      -->
+      { :else if step == 4 }
+        <RegistrationPage on:step={(e) => {
+          changeStep(e.detail.step, e.detail.loading);
+        }} on:check={(e) => {
+          checkStep();
+        }} on:error={(e) => {
+          changeError(e.detail);
+        }} />
+      {/if}
+    <!-- </Tile> -->
 
-  <!-- Error status -->
-  {#if error != null}
-    <div transition:slide class="py-4">
-      <Caption>{$_(error, { default: error })}</Caption>
-    </div>
-  {/if}
+    <!-- Error status -->
+    {#if error != null}
+      <div transition:slide class="py-4">
+        <Caption>{$_(error, { default: error })}</Caption>
+      </div>
+    {/if}
+  </div>
+
+  <!-- 
+
+    -->
+  <div style="background-image: url('{$theme == "dark" ? "background-dark.png" : "background-light.png"}'); background-size: cover; background-position: center center; background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[2]}" class="relative h-full w-full flex flex-col justify-center items-center hidden lg:flex"></div>
 </main>

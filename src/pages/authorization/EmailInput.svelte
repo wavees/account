@@ -70,7 +70,7 @@
     Heading, 
     Caption, 
     
-    Spinner } from "darkmode-components/src/index"
+    Spinner } from "../../../../darkmode/src/index"
 
   // onMount function
   onMount(() => {
@@ -126,22 +126,22 @@
 <!-- 
   Layout
  -->
-<main>
+<main class="px-4 md:px-16 lg:px-24">
   <div class="w-full text-center">
-    <Heading>Введите почту</Heading>
-    <Caption>для того, что бы войти в аккаунт</Caption>
+    <Heading>{$_("authorize.emailScreen.header", { default: "Let's login" })}</Heading>
+    <Caption>{$_("authorize.emailScreen.subheader", { default: "to continue using Wavees Services" })}</Caption>
   </div>
 
-  <div class="mt-12 w-full flex flex-col justify-center items-center px-2 md:px-8 lg:px-16">
+  <div class="mt-12 w-full flex flex-col justify-center items-center">
     <!-- Email input -->
-    <div class="flex">
+    <div class="w-full">
       <TextInput on:keyup={(e) => {
         dispatch("error", null);
       }} id="email" bind:value={email} on:keyup={(e) => keyup(e)} on:input={(e) => input(e)} fullWidth={true} type="email" title="Ваша почта" placeholder="*******@user.com">
-        
+
         <!-- Icon, that'll show if our email 
-        is valid or not -->
-        <div slot="icon-right" class="mx-4">
+        is valid or not
+        <div slot="icon-right">
           { #if emailValidating }
             <Spinner size="25" />
           { :else }
@@ -151,16 +151,26 @@
               <img src="./icons/checkmark.svg" alt="Valid Icon">
             { /if }
           { /if }
-        </div>
+        </div> -->
       </TextInput>
     </div>
-
+    
     <!-- Buttons -->
-    <div class="mt-16 flex">
-      <Button type="ghost">{ $_("global.back", { default: "Back" }) }</Button>
+    <div class="mt-8 w-full">
       <Button on:click={(e) => {
         process();
-      }}>{$_("global.proceed", { default: "Proceed" })}</Button>
+      }} fullWidth={true} roundedCorners="tl,bl,br">
+        { #if emailValidating }
+          <Spinner size="15" color="#fff" />
+        { :else }
+          {$_("global.proceed", { default: "Proceed" })}
+        { /if }
+      </Button>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="mt-6 w-full text-left">
+      <Caption>{$_("authorize.dislaimer", { default: "By continuing, you agree to our terms of use." })}</Caption>
     </div>
   </div>
 </main>

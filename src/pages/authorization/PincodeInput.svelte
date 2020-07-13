@@ -26,13 +26,16 @@
   import { 
     TextInput, 
     
-    Button, 
+    Button,
+
+    Spinner, 
     
     Heading, 
-    Caption, 
+    Caption,
+    Text,
     
     Avatar, 
-    theme } from "darkmode-components/src/index"
+    theme } from "../../../../darkmode/src/index"
 
   // Function, that'll process given information
   function process() {
@@ -65,6 +68,7 @@
 
     pincode = pincode.join("");
 
+    // And now let's authorize our user.
     if (pincode.split('').length != 4) {
       dispatch("error", "authorization.errors.invalidPincode");
     } else {
@@ -90,38 +94,129 @@
     }
   };
 
-  // Let's get avatar from email string.
+  // Let's now load some user informaton.
   onMount(() => {
+    // Let's focus on pincode input.
     let focusElement = document.getElementById("pincode-start");
     focusElement.focus();
 
     // Let's get user's email...
-    let email = cookies.get('_login_email');
+    email = cookies.get('_login_email');
 
-    axios.get(`${$api.url}/user/check/${email}`)
+    axios.get(`http://localhost:3003/v1/user/check/${email}`)
     .then((response) => {
       let data = response.data;
+      loaded = true;
 
+      // User Avatar
       if (data.avatar != null) {
         avatarImage = data.avatar;
       };
+
+      // Username
+      if (data.username != null) {
+        username = data.username;
+      };
     }).catch((error) => {
+      loaded = true;
       dispatch("error", "authorization.errors.unableToGetAvatar");
     });
   });
 
+  let loaded = false;
+
+  let email;
+  let username;
   let avatarImage;
+  
   let pincode;
 
   // Function, thah'll help us to check user's input
   function keyup(e) {
     dispatch("error", null);
 
+    // And now let's focus on second/third/(and so on)
+    // pincode input.
+
+    // @warning! This is very dumb realization,
+    // but it works! And it works perfectly!
+    // Somehow.
+    let currentID = e.originalTarget.id;
+
+    // Let's now determine the type of
+    // this keypress.
+
+    let type;
+    if (e.keyCode === 37) {
+      type = "backspace";
+    } else if (e.keyCode === 8) {
+      type = "nothing";
+    } else {
+      type = "normal" 
+    };
+
+    let focus;
+
+    switch (currentID) {
+      case "pincode-start":
+        if (type == "normal") {
+          focus = document.getElementById('pincode-2');
+        };
+        break;
+    
+      case "pincode-2":
+        if (type == "backspace") {
+          focus = document.getElementById('pincode-start');
+        } else if (type == "normal") {
+          focus = document.getElementById('pincode-3');
+        };
+        break;
+
+      case "pincode-3":
+        if (type == "backspace") {
+          focus = document.getElementById('pincode-2');
+        } else if (type == "normal") {
+          focus = document.getElementById('pincode-4');
+        };
+        break;
+
+      case "pincode-4":
+        if (type == "backspace") {
+          focus = document.getElementById('pincode-3');
+        };
+        break;
+
+      default:
+        break;
+    };
+
+    // And now let's just focus on
+    // new pincode input.
+    if (focus) {
+      focus.focus();
+      moveCursorToEnd(focus);
+    };
+
+    // Let's check if user pressed ENTER
+    // button or no.
     if (e.keyCode === 13) {
       e.preventDefault();
       process();
-    }
+    };
   };
+
+  // Small helper function, that'll move user's
+  // cursor to the end of input.
+  function moveCursorToEnd(el) {
+    if (typeof el.selectionStart == "number") {
+        el.selectionStart = el.selectionEnd = el.value.length;
+    } else if (typeof el.createTextRange != "undefined") {
+        el.focus();
+        var range = el.createTextRange();
+        range.collapse(false);
+        range.select();
+    }
+  }
 </script>
 
 <style>
@@ -142,33 +237,58 @@
 <!-- 
   Layout
  -->
-<main>
-  <div class="w-full text-center flex flex-col justify-center items-center">
-    <Avatar type="image" {avatarImage} size={4.5} />
+<main class="relative">
+  <!-- 
+    Let's check if we have loaded
+    our user information or no. -->
+  
+  { #if !loaded }
+    <div style="z-index: 999;" class="absolute bg-white h-full w-full flex items-center justify-center">
+      <Spinner />
+    </div>
+  { /if }
 
-    <div class="mt-4">
-      <Heading>Введите пинкод</Heading>
-      <Caption>который вы получили по время регистрации</Caption>
+  <!-- 
+    Header
+  -->
+  <div class="px-4 md:px-16 lg:px-24 w-full flex flex-col justify-center items-center">
+    <!-- Some text -->
+    <div class="w-full text-center">
+      <Heading>{$_("authorize.pincodeScreen.header", { default: "Write pincode" })}</Heading>
+      <Caption>{$_("authorize.pincodeScreen.subheader", { default: "you received when you registered to log in" })}</Caption>
+    </div>
+
+    <!-- User Profile card -->
+    <div class="mt-6 flex items-center">
+      <Avatar type="image" avatar={avatarImage} size={4.5} />
+    
+      <div class="mx-4">
+        <Text size="20px">{username == null ? $_("global.unknownUsername", { default: "Unknown user" }) : username}</Text>
+        <Caption>{email}</Caption>
+      </div>
     </div>
   </div>
 
+  <!-- Content -->
   <div class="mt-12 w-full flex flex-col justify-center items-center px-2 md:px-8 lg:px-16">
     <div style="{$theme == "light" ? "color: #000;" : "color: #fff;"}" class="items-center text-center">
       <input id="pincode-start" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
-      <input type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
-      <input type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
-      <input type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+      <input id="pincode-2" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+      <input id="pincode-3" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+      <input id="pincode-4" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
     </div>
 
     <!-- Buttons -->
-    <div class="mt-16 flex">
+    <div class="mt-16 w-full flex">
       <Button on:click={(e) => {
         cookies.remove('_login_email');
+
+        dispatch("error", null);
         dispatch('step', { step: 1, loading: false });
-      }} type="ghost">{ $_("global.back", { default: "Back" }) }</Button>
+      }} fullWidth={true} type="ghost">{ $_("global.back", { default: "Back" }) }</Button>
       <Button on:click={(e) => {
         process();
-      }}>{$_("global.proceed", { default: "Proceed" })}</Button>
+      }} fullWidth={true}>{$_("global.login", { default: "Login" })}</Button>
     </div>
   </div>
 </main>

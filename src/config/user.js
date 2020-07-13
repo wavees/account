@@ -2,7 +2,7 @@
 import { writable } from "svelte/store";
 import axios from "axios";
 
-const api = "https://api.wavees.co.vu"
+const api = "https://localhost:3003/v1"
 
 // 
 // func createUserStore()
