@@ -1,10 +1,11 @@
 // Import
 import axios from "axios"
+import { api, version } from "./config.js";
 
 export default (email, pincode, type = "ordinary", session) => {
   return new Promise((resolve, reject) => {
     // Let's try to login our user...
-    axios.post("https://api.wavees.co.vu/user/login",
+    axios.post(`${api}/${version}/user/login`,
     {
       email: email,
       pincode: pincode
@@ -29,14 +30,14 @@ export default (email, pincode, type = "ordinary", session) => {
           if (session == null) {
             reject({ error: "InvalidSession" });
           } else {
-            axios.get(`https://api.wavees.co.vu/account/${session}`)
+            axios.get(`${api}/${version}/account/${session}`)
             .then((response) => {
               let account = response.data;
 
               // Here we just need to add new token
               // to existing session.
               if (account.type == "session") {
-                axios.put(`https://api.wavees.co.vu/account/${session}/${data.token}`)
+                axios.put(`${api}/${version}/account/${session}/${data.token}`)
                 .then((response) => {
                   let session = response.data;
 
@@ -52,7 +53,7 @@ export default (email, pincode, type = "ordinary", session) => {
               // And here we just need to create new
               // session with this two tokens.
               } else if (account.type == "user") {
-                axios.post("https://api.wavees.co.vu/account", {
+                axios.post(`${api}/${version}/account`, {
                   profiles: [
                     session,
                     data.token

@@ -1,13 +1,12 @@
 // Import
 import axios from "axios";
-// import { api } from "../../config/global.js";
+import { api, version } from "./config.js";
 
 // Let's export a function that'll
 // handle email checking.
 export default (email) => {
   return new Promise((resolve, reject) => {
-    console.log("CHECKING...");
-    axios.get(`https://api.wavees.co.vu/user/check/${email}`)
+    axios.get(`${api}/${version}/user/check/${email}`)
     .then(() => {
       // User exists, so we just need
       // to login.
@@ -16,7 +15,7 @@ export default (email) => {
       // Ok, so, probably, this user doesn't
       // exists. So now we need to check if 
       // this email address is correct.
-      axios.get(`https://api.wavees.co.vu/user/validate/${email}`)
+      axios.get(`${api}/${version}/user/validate/${email}`)
       .then((response) => {
         // Let's return a response;
         resolve({ exists: false, validEmail: response.data.valid });

@@ -70,7 +70,7 @@
     Heading, 
     Caption, 
     
-    Spinner } from "../../../../darkmode/src/index"
+    Spinner } from "darkmode-components/src/index"
 
   // onMount function
   onMount(() => {

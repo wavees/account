@@ -35,7 +35,7 @@
     Text,
     
     Avatar, 
-    theme } from "../../../../darkmode/src/index"
+    theme } from "darkmode-components/src/index"
 
   // Function, that'll process given information
   function process() {
@@ -103,7 +103,7 @@
     // Let's get user's email...
     email = cookies.get('_login_email');
 
-    axios.get(`http://localhost:3003/v1/user/check/${email}`)
+    axios.get(`${$api.url}/user/check/${email}`)
     .then((response) => {
       let data = response.data;
       loaded = true;
