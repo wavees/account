@@ -30,7 +30,7 @@
 </script>
 
 <!-- Main Layout -->
-<main style="min-height: 100vh;" class="w-full flex justify-center items-center relative">
+<main style="min-height: 100vh;" class="bg-gray-100 w-full flex justify-center items-center relative">
   <!-- Header -->
   <div class="absolute inset-x-0 top-0 py-4 text-center">
     <h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[1]}" class="text-1xl text-bold">account</h1>

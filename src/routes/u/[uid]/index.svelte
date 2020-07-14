@@ -42,7 +42,7 @@
    and (min-width : 320px) {
   /* Styles here */
   .wrapper {
-     padding: 1.5rem 0;
+     padding: 0 0;
    }
 }
 
@@ -51,7 +51,7 @@
    and (min-width : 768px) {
    /* Styles here */
    .wrapper {
-     padding: 1.5rem 15%;
+     padding: 0 5%;
    }
 }
 
@@ -60,7 +60,7 @@
    and (min-width : 1200px) {
    /* Styles here */
   .wrapper {
-    padding: 1.5rem 35%;
+    padding: 0 5%;
   }
 }
 
@@ -71,7 +71,6 @@
   display: flex;
   height: 100%;
   justify-content: center;
-  width: 100%;
 }
 
 .panel {
@@ -94,8 +93,10 @@
   card-stylized system
   for this.
 -->
-<div class="w-full h-full flex justify-center items-center relative">
-  <div class="wrapper">
+<div class="bg-gray-100 w-full h-full py-24 lg:py-0 lg:pt-0 flex flex-col lg:flex-row justify-center items-center relative">
+  
+  <!-- User Card -->
+  <div class="wrapper w-full lg:w-2/4">
     <div class="panel">
       <div style="background-image: url('background-light.png'); background-size: cover; background-position: center center;" class="panel__img-col w-full h-full bg-white rounded-lg flex flex-col justify-center items-center">
         <!-- Loading state... -->
@@ -118,7 +119,7 @@
 
           { #if $user.current.id == $current.uid }
             <!-- Log out/Settings Buttons -->
-            <div class="w-full px-8 md:px-16 lg:px-4 pt-12 flex flex-col lg:flex-row justify-center">
+            <div class="w-full px-8 md:px-16 lg:px-4 pt-12 flex flex-col justify-center">
               <!-- Settings button -->
               <Button type="ghost">
                 {$_("global.settings", { default: "Settings" })}
@@ -135,6 +136,22 @@
             </div>
           { /if }
         { /if }
+      </div>
+    </div>
+  </div>
+
+  <!-- User information Card -->
+  <div class="panel pt-16 lg:pt-0 px-4 md:pr-16 lg:pr-24">
+    <div class="h-full w-full flex justify-center items-center rounded-lg bg-white shadow-2xl">
+      <div class="flex flex-col justify-center items-center text-center">
+        <!-- Image -->
+        <img style="width: 6.5rem;" src="./illustrations/no_data.svg" alt="No Data Illustration">
+
+        <!-- Some text -->
+        <div class="mt-6">
+          <Heading>Empty account</Heading>
+          <Caption>This account doesn't have any public information</Caption>
+        </div>
       </div>
     </div>
   </div>
