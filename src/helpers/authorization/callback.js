@@ -26,6 +26,11 @@ export default (token) => {
       // medals@wavees with our current
       // user token.
       window.location.href = `https://medals.wavees.co.vu/login/${token}`;
+    } else if (id == "developer@wavees") {
+      // And now let's redirect
+      // user to developer@wavees
+      // with his user token.
+      window.location.href = `https://developer.wavees.co.vu/login/${token}`;
     }
   });
 };
