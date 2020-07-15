@@ -31,6 +31,11 @@ export default (token) => {
       // user to developer@wavees
       // with his user token.
       window.location.href = `https://developer.wavees.co.vu/login/${token}`;
-    }
+    } else if (id == "@wavees") {
+      // And now let's just redirect our
+      // user to @wavees. And, yes, we'll send
+      // our current token.
+      window.location.href = `https://wavees.co.vu/login/${token}`;
+    };
   });
 };

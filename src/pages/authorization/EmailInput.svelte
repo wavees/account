@@ -140,7 +140,7 @@
     <div class="w-full">
       <TextInput on:keyup={(e) => {
         dispatch("error", null);
-      }} id="email" bind:value={email} on:keyup={(e) => keyup(e)} on:input={(e) => input(e)} fullWidth={true} type="email" title="Ваша почта" placeholder="*******@user.com">
+      }} id="email" bind:value={email} on:keyup={(e) => keyup(e)} on:input={(e) => input(e)} fullWidth={true} type="email" title={$_("authorization.emailScreen.emailInput", { default: "Your email" })} placeholder="*******@user.com">
 
         <!-- Icon, that'll show if our email 
         is valid or not
