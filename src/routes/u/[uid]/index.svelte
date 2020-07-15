@@ -22,6 +22,9 @@
 
     Avatar
   } from "darkmode-components/src/index";
+
+  // Let's now import other components...
+  import MedalsWrapper from "../../../components/medals/Wrapper.svelte";
 </script>
 
 <!-- 
@@ -111,13 +114,22 @@
           <div class="text-center">
             <Heading>{$current.username}</Heading>
             <Caption>{$current.email}</Caption>  
+
+            <!-- Some profile information -->
+            <div class="mt-2 md:mt-4 w-full flex justify-center items-center">
+              <!-- Coins -->
+              <div class="text-gray-800 flex items-center">
+                <img class="mx-2" style="width: 1.2em;" src="./icons/triangle.svg" alt="Coins">
+                {$user.current.coins}
+              </div>
+            </div>
           </div>
 
           <!-- 
             Let's now check if this is our
             currently logged in user or no. -->
 
-          { #if $user.current.id == $current.uid }
+          { #if $user.current.id == $current.id }
             <!-- Log out/Settings Buttons -->
             <div class="w-full px-8 md:px-16 lg:px-4 pt-12 flex flex-col justify-center">
               <!-- Settings button -->
@@ -142,17 +154,36 @@
 
   <!-- User information Card -->
   <div class="panel pt-16 lg:pt-0 px-4 md:pr-16 lg:pr-24">
-    <div class="h-full w-full flex justify-center items-center rounded-lg bg-white shadow-2xl">
-      <div class="flex flex-col justify-center items-center text-center">
-        <!-- Image -->
-        <img style="width: 6.5rem;" src="./illustrations/no_data.svg" alt="No Data Illustration">
+    <div class="h-full w-full flex flex-col { !$current.loaded ? "justify-center items-center" : "" } rounded-lg bg-white shadow-2xl">
 
-        <!-- Some text -->
-        <div class="mt-6">
-          <Heading>Empty account</Heading>
-          <Caption>This account doesn't have any public information</Caption>
+      { #if $current.loaded }
+        <!-- Some user information -->
+
+        <!-- User's cards list -->
+        <div class="w-full px-2 md:px-6 pt-4 md:pt-6">
+          <Heading>User medals</Heading>
+          <Caption>All user's medals and cards from <span class="text-gray-800">medals.wavees.co.vu</span></Caption>
+          
+          <div class="w-full flex mt-4">
+            <MedalsWrapper cardsNumber={4} />
+
+            <!-- Show all button -->
+            <!-- <div style="width: 8rem; height: 10rem;" class="bg-white rounded-lg mx-4 mt-6 lg:mt-6 flex justify-center items-center shadow-2xl text-white relative">
+  
+              # Heading and icon
+              <div class="px-2 flex flex-col justify-center items-center text-black text-base text-center">
+                # Icon
+                <img style="width: 1.6em;" src="./icons/layers.svg" alt="All cards">
+
+                # Heading itself
+                <h1 class="mt-2">Show all cards</h1>
+              </div>
+            </div> -->
+          </div>
         </div>
-      </div>
+      { :else }
+        <Spinner />
+      { /if }
     </div>
   </div>
 </div>

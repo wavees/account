@@ -1,6 +1,6 @@
 <script>
   // import
-  import { _ } from "svelte-i18n";
+  import { _, locale } from "svelte-i18n";
   
   import { onMount } from "svelte";
   import { slide } from "svelte/transition";
@@ -152,7 +152,8 @@
       Wavees Authorization logotype
      -->
     <div class="text-center py-4 px-6 absolute inset-x-0 top-0">
-      <h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[1]}" class="text-1xl text-bold">wavees</h1>
+      <h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[1]}" class="text-2xl text-bold">wavees</h1>
+      <p></p>
     </div>
     
     <!-- Tile -->
@@ -215,6 +216,23 @@
         <Caption>{$_(error, { default: error })}</Caption>
       </div>
     {/if}
+
+    <!-- Change language and copyright -->
+    <div class="absolute inset-x-0 bottom-0 w-full flex justify-center items-center py-6">
+      
+      <!-- Smol language picker -->
+      <div class="flex">
+        <button on:click={(e) => {
+          cookies.set("_language", "ru");
+          locale.set("ru");
+        }} class="mx-2 {$locale.includes("ru") ? "text-gray-800" : "text-gray-500"}">RU</button>
+        
+        <button on:click={(e) => {
+          cookies.set("_language", "en");
+          locale.set("en");
+        }} class="mx-2 {$locale.includes("en") ? "text-gray-800" : "text-gray-500"}">EN</button>
+      </div>
+    </div>
   </div>
 
   <!-- 

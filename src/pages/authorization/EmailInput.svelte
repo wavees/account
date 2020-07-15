@@ -141,20 +141,6 @@
       <TextInput on:keyup={(e) => {
         dispatch("error", null);
       }} id="email" bind:value={email} on:keyup={(e) => keyup(e)} on:input={(e) => input(e)} fullWidth={true} type="email" title={$_("authorization.emailScreen.emailInput", { default: "Your email" })} placeholder="*******@user.com">
-
-        <!-- Icon, that'll show if our email 
-        is valid or not
-        <div slot="icon-right">
-          { #if emailValidating }
-            <Spinner size="25" />
-          { :else }
-            { #if emailInvalid == true }
-              <img src="./icons/error.svg" alt="Error Icon">
-            { :else if emailInvalid == false }
-              <img src="./icons/checkmark.svg" alt="Valid Icon">
-            { /if }
-          { /if }
-        </div> -->
       </TextInput>
     </div>
     
