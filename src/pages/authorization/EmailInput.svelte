@@ -14,6 +14,7 @@
   // Not-so-complex function, that'll help us
   // to validate user emails.
   function validateEmail(checkEmail) {
+    checkEmail = checkEmail.toLowerCase();
     emailValidating = true;
 
     // Let's check if our email changed or no.
@@ -32,7 +33,7 @@
         validateEmailExternal(checkEmail)
         .then((response) => {
           // Let's now check something...
-          if (checkEmail == email) {
+          if (checkEmail == email.toLowerCase()) {
             emailValidating = false;
 
             if (response.exists) {
@@ -43,7 +44,7 @@
           }
         }).catch((error) => {
           // And here we also need to check something..
-          if (checkEmail == email) {
+          if (checkEmail == email.toLowerCase()) {
             emailValidating = false;
             emailInvalid = true;
           }
@@ -87,10 +88,12 @@
 
     // Let's validate user's email.
     if (!emailInvalid) {
+      emailValidating = true;
+      
       // Email is valid, so let's just create a new cookie
       // with this email (cookie name: _login_email) and
       // ask our "engine" to reload this page.
-      cookies.set('_login_email', email);
+      cookies.set('_login_email', email.toLowerCase());
 
       dispatch("check");
     } else {

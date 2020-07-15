@@ -39,6 +39,8 @@
 
   // Function, that'll process given information
   function process() {
+    loading = true;
+
     // Let's create event, that'll change our tile
     // to loading state.
     dispatch('step', { step: 2, loading: true });
@@ -86,9 +88,11 @@
 
           dispatch("check");
         } else {
+          loading = false;
           dispatch("error", "authorization.errors.invalidPincode");
         }
       }).catch(() => {
+        loading = false;
         dispatch("error", "authorization.errors.unableToLogin");
       });
     }
@@ -124,6 +128,8 @@
   });
 
   let loaded = false;
+
+  let loading = false;
 
   let email;
   let username;
@@ -305,7 +311,13 @@
       }} fullWidth={true} type="ghost">{ $_("global.back", { default: "Back" }) }</Button>
       <Button on:click={(e) => {
         process();
-      }} fullWidth={true}>{$_("global.login", { default: "Login" })}</Button>
+      }} fullWidth={true}>
+        { #if loading }
+          <Spinner size="15" color="#fff" />
+        { :else }
+          {$_("global.login", { default: "Login" })}
+        { /if }
+      </Button>
     </div>
   </div>
 </main>

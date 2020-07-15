@@ -1,0 +1,16 @@
+{
+  "_comment:": "Authorization page localization.",
+  "authorization": {
+    "errors": {
+      "unableToRegister": "Невозможно зарегистрироваться.",
+      "unableToAddAccount": "Невозможно добавить аккаунт к сессии.",
+      "unableToRegisterSession": "Невозможно зарегистрировать сессию.",
+      "unableToLogin": "Невозможно выполнить авторизацию.",
+      "unableToFinishCallback": "Невозможно получить доступ к аккаунту",
+      "invalidPincode": "Неизвестный пинкод",
+      "invalidEmail": "Неизвестная почта",
+      "unableToGetAvatar": "Невозможно получить иконку аккаунта",
+      "pincodeLength": "Неправильный пинкод, проверьте ещё раз."
+    }
+  }
+}

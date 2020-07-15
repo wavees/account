@@ -1,0 +1,16 @@
+{
+  "_comment:": "Authorization page localization.",
+  "authorization": {
+    "errors": {
+      "unableToRegister": "Unable to register.",
+      "unableToAddAccount": "Unable to add this account to session.",
+      "unableToRegisterSession": "Unable to register new session.",
+      "unableToLogin": "Unable to authorize.",
+      "unableToFinishCallback": "Unable to access account information.",
+      "invalidPincode": "Invalid pincode",
+      "invalidEmail": "Invalid email",
+      "unableToGetAvatar": "Unable to access account information",
+      "pincodeLength": "Invalid pincode, try again."
+    }
+  }
+}
