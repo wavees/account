@@ -162,7 +162,7 @@
         <!-- User's cards list -->
         <div class="w-full px-2 md:px-6 pt-4 md:pt-6">
           <Heading>User medals</Heading>
-          <Caption>All user's medals and cards from <span class="text-gray-800">medals.wavees.co.vu</span></Caption>
+          <Caption>All user's medals and cards from <span style="cursor: pointer" on:click={(e) => window.location.href = "https://medals.wavees.co.vu/" } class="text-gray-800">medals.wavees.co.vu</span></Caption>
           
           <div class="w-full flex mt-4">
             <MedalsWrapper cardsNumber={4} />
