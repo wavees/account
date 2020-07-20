@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
 
   import { current } from "../../config/stores/user";
-  import { api } from "../../config/stores/global";
+  import api from "../../config/application/api";
 
   import { _ } from "svelte-i18n";
 
@@ -27,7 +27,7 @@
     const uid   = $current.id;
 
     // And now let's get our cards..
-    axios.get(`${$api.url}/${$api.version}/account/${uid}/medals/list`)
+    axios.get(`${api.url}/${api.version}/account/${uid}/medals/list`)
     .then((response) => {
       let data = response.data;
 
@@ -49,7 +49,7 @@
   // specific card.
   function loadCard(id) {
     // Let's now get information about this card..
-    axios.get(`${$api.url}/${$api.version}/medal/${id}`)
+    axios.get(`${api.url}/${api.version}/medal/${id}`)
     .then((response) => {
       let data = response.data;
 

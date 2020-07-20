@@ -2,7 +2,7 @@
 import { writable } from "svelte/store";
 import axios from "axios";
 
-import { url, version } from "../application/api";
+import api from "../application/api";
 
 // 
 // func createUserStore()
@@ -58,7 +58,7 @@ function createUserStore() {
     // and store it in current object)
     setToken: (token) => {
       // Let's get that user object..
-      axios.get(`${url}/${version}/account/${token}`)
+      axios.get(`${api.url}/${api.version}/account/${token}`)
       .then((response) => {
         let data = response.data;
 
@@ -95,7 +95,7 @@ function createUserStore() {
           // our store with new data.
           let currentToken = data.current.token == null ? data.profiles[0] : data.current.token;
 
-          axios.get(`${url}/${version}/account/${currentToken}`)
+          axios.get(`${api.url}/${api.version}/account/${currentToken}`)
           .then((response) => {
             let data = response.data;
 
@@ -177,7 +177,7 @@ function createUserStore() {
 const user = createUserStore();
 
 async function loadProfile(token) {
-  axios.get(`${url}/${version}/account/${token}`)
+  axios.get(`${api.url}/${api.version}/account/${token}`)
   .then((response) => {
     let data = response.data;
 
@@ -244,7 +244,7 @@ function createCurrentUserStore() {
     loadProfile: (uid) => {
       // And now let's try to fetch some information
       // about this account...
-      axios.get(`${url}/${version}/user/${uid}`)
+      axios.get(`${api.url}/${api.version}/user/${uid}`)
       .then((response) => {
         let data = response.data;
 

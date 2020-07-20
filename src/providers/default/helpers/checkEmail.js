@@ -2,13 +2,13 @@
 import axios from "axios";
 
 // Importing config.
-import { url, version } from "../../config/application/api";
+import api from "../../../config/application/api";
 
 // Let's export a function that'll
 // handle email checking.
 export default (email) => {
   return new Promise((resolve, reject) => {
-    axios.get(`${url}/${version}/user/check/${email}`)
+    axios.get(`${api.url}/${api.version}/user/check/${email}`)
     .then(() => {
       // User exists, so we just need
       // to login.
@@ -17,7 +17,7 @@ export default (email) => {
       // Ok, so, probably, this user doesn't
       // exists. So now we need to check if 
       // this email address is correct.
-      axios.get(`${url}/${version}/user/validate/${email}`)
+      axios.get(`${api.url}/${api.version}/user/validate/${email}`)
       .then((response) => {
         // Let's return a response;
         resolve({ exists: false, validEmail: response.data.valid });

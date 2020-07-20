@@ -5,7 +5,6 @@
 
   import { onMount } from "svelte";
 
-  import { api } from "../../../config/stores/global";
   import { current } from "../../../config/stores/user";
   import { stores } from "@sapper/app"; 
 

@@ -16,11 +16,10 @@
   // Let's get page store
   const { page } = stores();
 
-  // Importing pages
-  import EmailInputPage from "../../pages/authorization/EmailInput.svelte";
-  import PincodeInputPage from "../../pages/authorization/PincodeInput.svelte";
-  
-  import RegistrationPage from "../../pages/authorization/RegistrationPage.svelte";
+  // And now we need to import
+  // our authorization provider.
+  import providers from "../../config/stores/providers.js";
+  const provider = providers.getProvider($page.query.providerId).module;
 
   // Importing components
   import { 
@@ -33,20 +32,18 @@
     
     Spinner } from "darkmode-components/src/index";
 
-  // Let's import some needed helpers
-  import CheckEmailHelper from "../../helpers/authorization/checkEmail";
-  import PlainRedirectHelper from "../../helpers/authorization/redirect";
-  import CallbackRedirectHelper from "../../helpers/authorization/callback";
+  let error;
+  let step = "check";
+  let loading = true;
 
-  const helpers = {
-    check: {
-      email: CheckEmailHelper
-    },
-
-    redirect: {
-      plain: PlainRedirectHelper,
-      callback: CallbackRedirectHelper
-    }
+  // Small function, that'll
+  // check our current state.
+  function check() {
+    provider.check()
+    .then((state) => {
+      loading = false;
+      step = state;
+    });
   };
 
   // onMount event
@@ -54,88 +51,10 @@
   // we need to show. Examples: (email, pincode, user registration
   // and so on)
   onMount(() => {
-    checkStep();
+    check();
   });
 
-  function checkStep (currentToken) {
-    loading = true;
-
-    let token = currentToken || cookies.get('_account_token');
-    let id = $page.params.id;
-
-    if (id == "add") {
-      if (step != 2) {
-        token = null;
-      };
-    };
-
-    if (token) {
-      // Now let's check if we need to
-      // just redirect user, or do we need
-      // to finish callback
-
-      // Just redirect user.
-      if (id == "add" || id == "login" || id == "register") {
-        helpers.redirect.plain();
-      } else {
-      // Finish callback and then redirect.
-        helpers.redirect.callback(token)
-      }
-    } else {
-      // And now we need to check if user already
-      // wrote his email or no.
-      let email = cookies.get('_login_email');
-
-      if (email) {
-        // Here we'll check user's email
-        helpers.check.email(email)
-        .then((response) => {
-          // User exists, so we just need to authorize
-          // user. So we let's show him pincode page
-          if (response.exists) {
-            step = 2;
-            loading = false;
-          } else {
-          // User doesn't exists, so let's show him registration
-          // screen.
-            step = 4;
-            loading = false;
-          }
-        }).catch((error) => {
-          // Error occured, so email doesn't even exists.
-          if (error == "InvalidEmail") {
-            changeError(error);
-          };
-        })
-      } else {
-        // We need to show login page...
-        step = 1;
-        loading = false;
-      }
-    }
-  };
-
-  // Function, that'll help us to change
-  // step and loading state directly from
-  // our components.
-  function changeStep(stepNumber, loadingState = false) {
-    step = stepNumber;
-    loading = loadingState;
-  };
-
-  // Function, that'll handle errors
-  function changeError(errorMessage) {
-    error = errorMessage;
-
-    loading = false;
-  };
-
-  // Authorization steps
-  let step = 0;
-  let loading = true;
-
-  // And errors
-  let error = null;
+  // Function, that'll 
 </script>
 
 <svelte:head>
@@ -145,8 +64,21 @@
 
 <main class="flex h-full items-center max-w-full">
   <!-- 
-
+    Loading screen
   -->
+  {#if step == "check" || loading}
+    <div style="height: 100vh; z-index: 999; background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[4]}" class="absolute w-full flex justify-center items-center">
+      <!-- Branding -->
+      <div class="flex flex-col justify-center items-center">
+        <div class="flex mb-6 items-center">
+          <h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[2]}" class="text-3xl text-bold">wavees</h1>
+        </div>
+
+        <Spinner />
+      </div>
+    </div>
+  {/if}
+
   <div style="background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[4]}" class="relative h-full w-full lg:w-2/3 flex flex-col justify-center items-center">
     <!-- 
       Wavees Authorization logotype
@@ -158,55 +90,35 @@
     
     <!-- Tile -->
       <!-- 
-        @step Loading
-        Just a loading sceen,
-        nothing special. 
+        @step Identity
+        In this step we need to identity
+        our user.
       -->
-      { #if step == 0 }
-        <div>
-          <Spinner />
-        </div>
+      { #if step == "identity" }
+        <svelte:component this={provider.pages.identity} 
+          on:error={(e) => error = e.detail}
+          on:check={() => check() } 
+        />
       <!-- 
-        @step Email Validation
-        Here user need to write down his email,
-        and then, we'll validate it.
-      -->
-      { :else if step == 1}
-        <EmailInputPage on:step={(e) => {
-          changeStep(e.detail.step, e.detail.loading);
-        }} on:check={(e) => {
-          checkStep();
-        }} on:error={(e) => {
-          changeError(e.detail);
-        }} />
+        @step Authorization
+        Step, in which our user needs
+        to authorize using his password/pincode
+        or whatever else.
+       -->
+      { :else if step == "authorization" }
+        <svelte:component this={provider.pages.authorization}
+          on:error={(e) => error = e.detail}
+          on:check={() => check()} />
       <!-- 
-        @step Pincode Validation
-        Just another screen for user validation.
-        Here user just need to write down
-        his pincode and login to his account.
+        @step Account Creation
+        Here we'll show page, where user
+        will be able to create new
+        account.
       -->
-      { :else if step == 2 }
-        <PincodeInputPage on:step={(e) => {
-          changeStep(e.detail.step, e.detail.loading);
-        }} on:check={(e) => {
-          checkStep();
-        }} on:error={(e) => {
-          changeError(e.detail);
-        }} />
-      
-      <!-- 
-        @step User Registration
-        Just another user registration page...
-        I think thah'll it be very compilcated and very good-looking
-      -->
-      { :else if step == 4 }
-        <RegistrationPage on:step={(e) => {
-          changeStep(e.detail.step, e.detail.loading);
-        }} on:check={(e) => {
-          checkStep();
-        }} on:error={(e) => {
-          changeError(e.detail);
-        }} />
+      { :else if step == "create" }
+        <svelte:component this={provider.pages.create}
+          on:error={(e) => error = e.detail}
+          on:check={() => check()} />
       {/if}
     <!-- </Tile> -->
 

@@ -1,7 +1,7 @@
 <script>
   // import
   import { _ } from "svelte-i18n";
-  import { api } from "../../config/stores/global.js";
+  import api from "../../../config/application/api";
 
   import axios from "axios";
 
@@ -14,7 +14,7 @@
   import Cookie from "cookie-universal";
 
   // Let's import some helpers
-  import authorizeUser from "../../helpers/authorization/loginUser";
+  import authorizeUser from "../methods/login";
 
   // Cookie manager
   const cookies = Cookie();
@@ -107,7 +107,7 @@
     // Let's get user's email...
     email = cookies.get('_login_email');
 
-    axios.get(`${$api.url}/${$api.version}/user/check/${email}`)
+    axios.get(`${api.url}/${api.version}/user/check/${email}`)
     .then((response) => {
       let data = response.data;
       loaded = true;
@@ -307,7 +307,7 @@
         cookies.remove('_login_email');
 
         dispatch("error", null);
-        dispatch('step', { step: 1, loading: false });
+        dispatch("check");
       }} fullWidth={true} type="ghost">{ $_("global.back", { default: "Back" }) }</Button>
       <Button on:click={(e) => {
         process();

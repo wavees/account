@@ -8,8 +8,8 @@
   import Cookie from "cookie-universal";
 
   // Let's import some helpers
-  import validateEmailRegex from "../../helpers/validateEmail";
-  import validateEmailExternal from "../../helpers/authorization/checkEmail";
+  import validateEmailRegex from "../helpers/validateEmail";
+  import validateEmailExternal from "../helpers/checkEmail";
 
   // Not-so-complex function, that'll help us
   // to validate user emails.
@@ -155,10 +155,14 @@
           {$_("global.proceed", { default: "Proceed" })}
         { /if }
       </Button>
+
+      <Button fullWidth={true} type="ghost" margin="mt-4">
+        Use another Authorization method
+      </Button> 
     </div>
 
     <!-- Disclaimer -->
-    <div class="mt-6 w-full text-left">
+    <div class="mt-6 w-full text-center">
       <Caption>{$_("authorize.dislaimer", { default: "By continuing, you agree to our terms of use." })}</Caption>
     </div>
   </div>

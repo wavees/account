@@ -2,6 +2,7 @@
 // store to determine callback
 // id.
 import { stores } from "@sapper/app";
+import global from "../../../config/application/global";
 
 // And let's import another
 // needed modules...
@@ -25,17 +26,21 @@ export default (token) => {
       // Let's now redirect user to
       // medals@wavees with our current
       // user token.
-      window.location.href = `https://medals.wavees.co.vu/login/${token}`;
+      window.location.href = `https://medals.${global.globalURL}/login/${token}`;
     } else if (id == "developer@wavees") {
       // And now let's redirect
       // user to developer@wavees
       // with his user token.
-      window.location.href = `https://developer.wavees.co.vu/login/${token}`;
+      window.location.href = `https://developer.${global.globalURL}/login/${token}`;
     } else if (id == "@wavees") {
       // And now let's just redirect our
       // user to @wavees. And, yes, we'll send
       // our current token.
-      window.location.href = `https://wavees.co.vu/login/${token}`;
-    };
+      window.location.href = `https://${global.globalURL}/login/${token}`;
+    } else {
+      // Let's just redirect our user
+      // to home page.
+      window.location.href = "/";
+    }
   });
 };
