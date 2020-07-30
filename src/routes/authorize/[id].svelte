@@ -62,7 +62,7 @@
   <title>Wavees Auth</title>
 </svelte:head>
 
-<main class="flex h-full items-center max-w-full">
+<main style="background-image: url('https://i.pinimg.com/originals/0e/9e/88/0e9e8812f01f82650833264673bf51ed.jpg'); background-size: cover; background-position: center center;" class="flex h-full items-center w-full">
   <!-- 
     Loading screen
   -->
@@ -79,16 +79,13 @@
     </div>
   {/if}
 
-  <div style="background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[4]}" class="relative h-full w-full lg:w-2/3 flex flex-col justify-center items-center">
+  <div class="w-full lg:w-1/3 h-full py-4 md:py-8 lg:py-16 px-2 md:px-6 lg:px-8">
     <!-- 
       Wavees Authorization logotype
      -->
-    <div class="text-center py-4 px-6 absolute inset-x-0 top-0">
-      <h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[1]}" class="text-2xl text-bold">wavees</h1>
-      <p></p>
-    </div>
     
     <!-- Tile -->
+    <div class="relative h-full flex flex-col justify-center items-center bg-white rounded-lg shadow-xl">
       <!-- 
         @step Identity
         In this step we need to identity
@@ -120,35 +117,31 @@
           on:error={(e) => error = e.detail}
           on:check={() => check()} />
       {/if}
-    <!-- </Tile> -->
 
-    <!-- Error status -->
-    {#if error != null}
-      <div transition:slide class="py-4">
-        <Caption>{$_(error, { default: error })}</Caption>
-      </div>
-    {/if}
-
-    <!-- Change language and copyright -->
-    <div class="absolute inset-x-0 bottom-0 w-full flex justify-center items-center py-6">
-      
-      <!-- Smol language picker -->
-      <div class="flex">
-        <button on:click={(e) => {
-          cookies.set("_language", "ru");
-          locale.set("ru");
-        }} class="mx-2 {$locale.includes("ru") ? "text-gray-800" : "text-gray-500"}">RU</button>
-        
-        <button on:click={(e) => {
-          cookies.set("_language", "en");
-          locale.set("en");
-        }} class="mx-2 {$locale.includes("en") ? "text-gray-800" : "text-gray-500"}">EN</button>
-      </div>
+      <!-- Error status -->
+      {#if error != null}
+        <div transition:slide class="py-4">
+          <Caption>{$_(error, { default: error })}</Caption>
+        </div>
+      {/if}
     </div>
+    <!-- </Tile> -->
   </div>
 
-  <!-- 
-
-    -->
-  <div style="background-image: url('{$theme == "dark" ? "background-dark.png" : "background-light.png"}'); background-size: cover; background-position: center center; background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[2]}" class="relative h-full w-full flex flex-col justify-center items-center hidden lg:flex"></div>
+  <!-- Change language and copyright -->
+  <!-- <div class="absolute inset-x-0 bottom-0 w-full flex justify-center items-center py-6">
+    
+    #Smol language picker
+    <div class="flex">
+      <button on:click={(e) => {
+        cookies.set("_language", "ru");
+        locale.set("ru");
+      }} class="mx-2 {$locale.includes("ru") ? "text-gray-800" : "text-gray-500"}">RU</button>
+      
+      <button on:click={(e) => {
+        cookies.set("_language", "en");
+        locale.set("en");
+      }} class="mx-2 {$locale.includes("en") ? "text-gray-800" : "text-gray-500"}">EN</button>
+    </div>
+  </div> -->
 </main>

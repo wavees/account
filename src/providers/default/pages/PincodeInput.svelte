@@ -266,8 +266,10 @@
     our user information or no. -->
   
   { #if !loaded }
-    <div style="z-index: 999;" class="absolute bg-white h-full w-full flex items-center justify-center">
-      <Spinner />
+    <div style="z-index: 999;" class="absolute h-full w-full px-4 md:px-6">
+      <div class="w-full h-full flex items-center justify-center bg-white">
+        <Spinner />
+      </div>
     </div>
   { /if }
 

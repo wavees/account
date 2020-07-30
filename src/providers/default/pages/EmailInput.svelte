@@ -156,9 +156,9 @@
         { /if }
       </Button>
 
-      <Button fullWidth={true} type="ghost" margin="mt-4">
+      <!-- <Button fullWidth={true} type="ghost" margin="mt-4">
         Use another Authorization method
-      </Button> 
+      </Button>  -->
     </div>
 
     <!-- Disclaimer -->
