@@ -54,7 +54,22 @@
     check();
   });
 
-  // Function, that'll 
+  // Header Items
+  let headerItems = [
+    {
+      title: "Our Services",
+      link: "https://wavees.ml"
+    },
+    {
+      title: "Wavees Company",
+      link: "https://company.wavees.ml"
+    },
+    // {
+    //   title: "Wavees Company",
+    //   link: "https://company.wavees.ml"
+    // },
+  ];
+
 </script>
 
 <svelte:head>
@@ -62,7 +77,7 @@
   <title>Wavees Auth</title>
 </svelte:head>
 
-<main style="background-image: url('https://i.pinimg.com/originals/0e/9e/88/0e9e8812f01f82650833264673bf51ed.jpg'); background-size: cover; background-position: center center;" class="flex h-full items-center w-full">
+<main style="background-image: url('https://source.unsplash.com/random/1600x900'); background-size: cover; background-position: center center;" class="flex h-full items-center w-full relative">
   <!-- 
     Loading screen
   -->
@@ -79,7 +94,20 @@
     </div>
   {/if}
 
-  <div class="w-full lg:w-1/3 h-full py-4 md:py-8 lg:py-16 px-2 md:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="absolute inset-x-0 top-0 px-2 md:px-6 lg:px-8 hidden py-6 lg:py-8 md:flex justify-between">
+    <!-- Logotype -->
+    <h1 style="font-family: Junegull" class="text-white text-xl">wavees</h1>
+  
+    <!-- Header Links -->
+    <div class="flex items-center">
+      {#each headerItems as item}
+        <a class="mx-6 text-gray-200 text-xs" href="{item.link}">{item.title}</a>
+      {/each}
+    </div>
+  </div>
+
+  <div class="w-full lg:w-1/3 h-full py-4 md:py-8 lg:py-24 px-2 md:px-6 lg:px-8">
     <!-- 
       Wavees Authorization logotype
      -->

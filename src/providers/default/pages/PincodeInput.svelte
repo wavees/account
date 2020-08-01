@@ -130,6 +130,7 @@
   let loaded = false;
 
   let loading = false;
+  let backLoading = false;
 
   let email;
   let username;
@@ -284,7 +285,7 @@
     </div>
 
     <!-- User Profile card -->
-    <div class="mt-6 flex items-center">
+    <div class="mt-4 flex items-center">
       <Avatar type="image" avatar={avatarImage} size={4.5} />
     
       <div class="mx-4">
@@ -295,7 +296,7 @@
   </div>
 
   <!-- Content -->
-  <div class="mt-12 w-full flex flex-col justify-center items-center px-2 md:px-8 lg:px-16">
+  <div class="mt-6 w-full flex flex-col justify-center items-center px-2 md:px-8 lg:px-16">
     <div style="{$theme == "light" ? "color: #000;" : "color: #fff;"}" class="items-center text-center">
       <input id="pincode-start" type="text" maxlength="1" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
       <input id="pincode-2" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
@@ -304,13 +305,20 @@
     </div>
 
     <!-- Buttons -->
-    <div class="mt-16 w-full flex">
+    <div class="mt-8 w-full flex">
       <Button on:click={(e) => {
         cookies.remove('_login_email');
+        backLoading = true;
 
         dispatch("error", null);
         dispatch("check");
-      }} fullWidth={true} type="ghost">{ $_("global.back", { default: "Back" }) }</Button>
+      }} fullWidth={true} type="ghost">
+        {#if backLoading}
+          <Spinner size="15" />
+        { :else }
+          { $_("global.back", { default: "Back" }) }
+        {/if}
+      </Button>
       <Button on:click={(e) => {
         process();
       }} fullWidth={true}>
