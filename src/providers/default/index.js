@@ -15,6 +15,7 @@ import PincodeInputPage from "./pages/PincodeInput.svelte";
 import RegistrationPage from "./pages/RegistrationPage.svelte";
 
 import CheckMethod from "./methods/check.js";
+import ProfileComponent from "./components/Profile.svelte";
 
 // @config
 // Configuration of this
@@ -26,6 +27,10 @@ const provider = {
     authorization: PincodeInputPage,
 
     create: RegistrationPage
+  },
+
+  components: {
+    profile: ProfileComponent
   }
 };
 

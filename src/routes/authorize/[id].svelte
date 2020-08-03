@@ -5,6 +5,8 @@
   import { onMount } from "svelte";
   import { slide } from "svelte/transition";
 
+  import { user } from "../../config/stores/user.js";
+
   import { goto } from "@sapper/app";
   import { stores } from "@sapper/app";
 
@@ -28,8 +30,11 @@
     
     Tile,
 
+    Heading,
     Caption,
     
+    Button,
+
     Spinner } from "darkmode-components/src/index";
 
   let error;
@@ -39,11 +44,63 @@
   // Small function, that'll
   // check our current state.
   function check() {
-    provider.check()
-    .then((state) => {
-      loading = false;
-      step = state;
-    });
+
+    // And now we need to check
+    // a lot of different things...
+
+    // Variable (Action Type) to determine
+    // our next steps (Show Accounts page or
+    // check for provider)
+    let type = "provider";
+
+    if ($page.params.id == "login") {
+      type = "provider";
+    } else {
+      if ($page.params.id == "add") {
+        type = "provider";
+      } else {
+        if ($page.query.providerId == null) {
+          if ($user.tokens.length >= 1) {
+            // So now let's show all user
+            // accounts ane etc.
+            type = "accounts";
+          } else {
+            // And now we need just to proceed
+            // with our current provider.
+            type = "provider";
+          }
+        } else {
+          // We don't even need
+          // to check for user accounts,
+          // let's just proceed with our
+          // provider.
+          type = "provider";
+        };
+      };
+    };
+
+    // And now let's do some actions
+    // depending on this "Action Type"
+    switch (type) {
+      case "accounts":
+        // Here we'll show accounts
+        // page to our user.
+        loading = false;
+        step = "accounts"
+        break;
+    
+      default:
+        // Default:
+        // let's call provider's
+        // check function.
+        provider.check()
+        .then((state) => {
+          loading = false;
+          step = state;
+        });
+
+        break;
+    }
   };
 
   // onMount event
@@ -63,11 +120,7 @@
     {
       title: "Wavees Company",
       link: "https://company.wavees.ml"
-    },
-    // {
-    //   title: "Wavees Company",
-    //   link: "https://company.wavees.ml"
-    // },
+    }
   ];
 
 </script>
@@ -100,9 +153,9 @@
     <h1 style="font-family: Junegull" class="text-white text-xl">wavees</h1>
   
     <!-- Header Links -->
-    <div class="flex items-center">
+    <div class="flex items-center px-6 bg-white rounded-lg">
       {#each headerItems as item}
-        <a class="mx-6 text-gray-200 text-xs" href="{item.link}">{item.title}</a>
+        <a class="px-6 py-4 text-gray-800 hover:text-black text-xs" href="{item.link}">{item.title}</a>
       {/each}
     </div>
   </div>
@@ -115,11 +168,42 @@
     <!-- Tile -->
     <div class="relative h-full flex flex-col justify-center items-center bg-white rounded-lg shadow-xl">
       <!-- 
+        @step Choose account
+        In this step we'll ask user
+        to choose one account. 
+      -->
+      { #if step == "accounts" }
+
+        <div class="w-full h-full px-4 md:px-8 py-6 flex flex-col">
+          <!-- Text -->
+          <div class="text-center">
+            <Heading>Choose account</Heading>
+            <Caption>to continue using Wavees Services</Caption>
+          </div>
+
+          <!-- Let's now list all user accounts -->
+          <div style="overflow-y: scroll;" class="my-6 w-full flex-grow relative">
+            <div style="overflow-y: scroll;" class="absolute pl-4 w-full h-full">
+              {#each $user.tokens as token}
+                <svelte:component this={provider.components.profile} token="{token}" />
+              {/each}
+            </div>
+          </div>
+
+          <!-- Button: Add new account -->
+          <div class="w-full flex justify-center pb-2">
+            <Button margin="py-0">
+              Add new account
+            </Button>
+          </div>
+        </div>
+
+      <!-- 
         @step Identity
         In this step we need to identity
         our user.
       -->
-      { #if step == "identity" }
+      { :else if step == "identity" }
         <svelte:component this={provider.pages.identity} 
           on:error={(e) => error = e.detail}
           on:check={() => check() } 
