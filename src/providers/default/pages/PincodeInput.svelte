@@ -3,6 +3,8 @@
   import { _ } from "svelte-i18n";
   import api from "../../../config/application/api";
 
+  import moment from "moment";
+
   import axios from "axios";
 
   import { stores } from "@sapper/app";
@@ -81,7 +83,8 @@
         // file and proceed with checkup 
         if (response.token != null) {
           cookies.set('_account_token', response.token, { 
-            path: "/"
+            path: "/",
+            expires: moment().add('1', 'year').toDate()
           });
           // And let's delete _login_email cookie
           cookies.remove('_login_email');
@@ -91,7 +94,9 @@
           loading = false;
           dispatch("error", "authorization.errors.invalidPincode");
         }
-      }).catch(() => {
+      }).catch((error) => {
+        console.log(error);
+
         loading = false;
         dispatch("error", "authorization.errors.unableToLogin");
       });
