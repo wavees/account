@@ -39,9 +39,14 @@ export default (token) => {
       window.location.href = `https://${global.globalURL}/login/${token}`;
     } else if (id == "tunnels@wavees") {
       // And now let's just redirect our
-      // user to @wavees. And, yes, we'll send
+      // user to tunnels@wavees. And, yes, we'll send
       // our current token.
       window.location.href = `https://tunnels.${global.globalURL}/login/${token}`; 
+    } else if (id == "blog@wavees") {
+      // And now let's just redirect our
+      // user to blog@wavees. And, yes, we'll send
+      // our current token.
+      window.location.href = `https://blog.${global.globalURL}/login/${token}`;
     } else {
       // Let's just redirect our user
       // to home page.
