@@ -1,0 +1,96 @@
+<script>
+  // Let's import some modules
+  import axios from "axios";
+  import { onMount } from "svelte";
+
+  // Cookie Manager
+  import Cookie from "cookie-universal";
+  const cookies = Cookie();
+
+  // And here let's import components
+  import {
+    Button,
+
+    Spinner
+  } from "darkmode-components/src/index";
+
+  // Small Variable, that'll show our current
+  // authorization step.
+  let step = "Preparing things";
+
+  // onMount event
+  // Here we'll redirect
+  // our user to Discord Login
+  // page and we'll monitor
+  // current authorization state.
+  onMount(() => {
+    // Let's just call
+    login();
+  });
+
+  // Function, that'll handle all
+  // discord-login related things
+  function login() {
+    // Let's firstly delete all Discord-related
+    // cookies.
+    cookies.remove('_discord_code');
+
+    // And now let's open new window
+    // with discord authorization page.
+    let discordURI = "https://discord.com/api/oauth2/authorize?client_id=740588352117538848&redirect_uri=https%3A%2F%2Faccount.wavees.ml%2Fauthorize%2Fprovider%2Fdiscord&response_type=code&scope=email%20identify";
+
+    // Let's firstly prepare our popup window
+    let height = screen.height;
+    let width = 500;
+
+    let left = (screen.width - width) / 2;
+    let top = (screen.height - height) / 4;
+    window.open(discordURI, "Wavees Authorization using Discord Account", 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + width + ', height=' + height + ', top=' + top + ', left=' + left);
+  
+    step = "Waiting for you to Login";
+
+    // Here we'll wait for user login
+    // credentials
+    setInterval(() => {
+      // Function, that'll check our current
+      // state.
+      if (cookies.get('_discord_code')) {
+        // Okay, so now we just need to
+        // get token for this account
+        // and then we need to proceed
+        // with login procedure.
+        step = "Checking for Discord Account";
+      };
+    }, 100);
+  }
+</script>
+
+<!-- 
+  Layout
+ -->
+<main class="px-4 md:px-16 lg:px-24 flex justify-center items-center">
+  <div class="flex flex-col justify-center text-center w-full h-full">
+    <!-- Text and Spinner -->
+    <div>
+      <span>
+        <Spinner />
+      </span>
+      
+      <p class="text-gray-700 text-sm mt-6">{step}</p>
+    </div>
+
+    <!-- Some buttons -->
+    <div class="mt-6">
+      <Button on:click={(e) => {
+        login();
+      }} type="ghost" fullWidth={true}>
+        Reload
+      </Button>
+    </div>
+  </div>
+
+  <!-- Small Footer -->
+  <div class="absolute inset-x-0 bottom-0 py-4 w-full text-center">
+    <p class="text-gray-700 text-xs">Please, don't close this window</p>
+  </div>
+</main>

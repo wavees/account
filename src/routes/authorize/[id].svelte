@@ -21,7 +21,7 @@
   // And now we need to import
   // our authorization provider.
   import providers from "../../config/stores/providers.js";
-  const provider = providers.getProvider($page.query.providerId).module;
+  let provider = providers.getProvider($page.query.providerId).module;
 
   // Importing components
   import { 
@@ -40,6 +40,18 @@
   let error;
   let step = "check";
   let loading = true;
+
+  // Function, that'll change
+  // our login provider.
+  function changeProvider(provider) {
+    // Let's firstly clear some variables
+    error = null;
+    step = "check";
+    loading = true;
+
+    // And now let's just change our provider.
+    provider = providers.getProvider(provider).module;
+  };
 
   // Small function, that'll
   // check our current state.
