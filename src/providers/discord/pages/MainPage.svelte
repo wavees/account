@@ -3,6 +3,15 @@
   import axios from "axios";
   import { onMount } from "svelte";
 
+  import api from "../../../config/application/api.js";
+
+  import authorizeUser from "../methods/login.js";
+
+  import { stores } from "@sapper/app";
+
+  // Let's get page store
+  const { page } = stores();
+
   // Cookie Manager
   import Cookie from "cookie-universal";
   const cookies = Cookie();
@@ -48,6 +57,7 @@
     window.open(discordURI, "Wavees Authorization using Discord Account", 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + width + ', height=' + height + ', top=' + top + ', left=' + left);
   
     step = "Waiting for you to Login";
+    let authorizing = false;
 
     // Here we'll wait for user login
     // credentials
@@ -60,6 +70,45 @@
         // and then we need to proceed
         // with login procedure.
         step = "Checking for Discord Account";
+
+        let code = cookies.get('_discord_code');
+
+        // Let's now get user token for this
+        // account.
+        if (!authorizing) {
+          authorizing = true;
+
+          // And now let's authorize our
+          // user.
+          let type;
+          let session;
+
+          // Now let's determine type of
+          // our action.
+          if ($page.paradms.id == "add") {
+            type = "sessionAdd";
+            session = cookies.get('_account_token');
+          };
+
+          authorizeUser(code, type, session)
+          .then((response) => {
+            if (response.token != null) {
+              cookies.set('_account_token', response.token, { 
+                path: "/",
+                expires: moment().add('1', 'year').toDate()
+              });
+              // And let's delete _login_email cookie
+              cookies.remove('_login_email');
+
+              dispatch("check");
+            } else {
+              loading = false;
+              dispatch("error", "authorization.errors.invalidPincode");
+            }
+          }).catch((error) => {
+            // Error Handling
+          });
+        };
       };
     }, 100);
   }
