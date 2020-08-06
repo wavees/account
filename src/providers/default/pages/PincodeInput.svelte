@@ -266,31 +266,31 @@
 <!-- 
   Layout
  -->
-<main class="relative">
-  <!-- 
-    Let's check if we have loaded
-    our user information or no. -->
-  
-  { #if !loaded }
-    <div style="z-index: 999;" class="absolute h-full w-full px-4 md:px-6">
-      <div class="w-full h-full flex items-center justify-center bg-white">
-        <Spinner />
-      </div>
-    </div>
-  { /if }
 
+<!-- 
+  Let's check if we have loaded
+  our user information or no. -->
+{ #if !loaded }
+  <div style="z-index: 999;" class="absolute h-full w-full px-4 md:px-6">
+    <div class="w-full h-full flex items-center justify-center bg-white">
+      <Spinner />
+    </div>
+  </div>
+{ /if }
+
+<main class="relative px-4 md:px-8 py-6 md:py-12">
   <!-- 
     Header
   -->
-  <div class="px-4 md:px-16 lg:px-24 w-full flex flex-col justify-center items-center">
+  <div class="w-full">
     <!-- Some text -->
     <div class="w-full text-center">
-      <Heading>{$_("authorize.pincodeScreen.header", { default: "Write pincode" })}</Heading>
-      <Caption>{$_("authorize.pincodeScreen.subheader", { default: "you received when you registered to log in" })}</Caption>
+      <h1 class="text-xl font-semibold">{$_("authorize.pincodeScreen.header", { default: "Write pincode" })}</h1>
+      <p class="text-sm text-gray-700">{$_("authorize.pincodeScreen.subheader", { default: "you received when you registered to log in" })}</p>
     </div>
 
     <!-- User Profile card -->
-    <div class="mt-4 flex items-center">
+    <div class="mt-6 flex justify-center items-center">
       <Avatar type="image" avatar={avatarImage} size={4.5} />
     
       <div class="mx-4">
@@ -301,7 +301,7 @@
   </div>
 
   <!-- Content -->
-  <div class="mt-6 w-full flex flex-col justify-center items-center px-2 md:px-8 lg:px-16">
+  <div class="mt-8 w-full flex flex-col justify-center items-center px-2 md:px-8">
     <div style="{$theme == "light" ? "color: #000;" : "color: #fff;"}" class="items-center text-center">
       <input id="pincode-start" type="text" maxlength="1" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
       <input id="pincode-2" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
@@ -311,6 +311,18 @@
 
     <!-- Buttons -->
     <div class="mt-8 w-full flex">
+      <!-- Login button -->
+      <Button on:click={(e) => {
+        process();
+      }} fullWidth={true}>
+        { #if loading }
+          <Spinner size="15" color="#fff" />
+        { :else }
+          {$_("global.login", { default: "Login" })}
+        { /if }
+      </Button>
+      
+      <!-- Back Button -->
       <Button on:click={(e) => {
         cookies.remove('_login_email');
         backLoading = true;
@@ -323,15 +335,6 @@
         { :else }
           { $_("global.back", { default: "Back" }) }
         {/if}
-      </Button>
-      <Button on:click={(e) => {
-        process();
-      }} fullWidth={true}>
-        { #if loading }
-          <Spinner size="15" color="#fff" />
-        { :else }
-          {$_("global.login", { default: "Login" })}
-        { /if }
       </Button>
     </div>
   </div>

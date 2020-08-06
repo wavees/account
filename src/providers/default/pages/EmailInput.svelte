@@ -98,6 +98,7 @@
       dispatch("check");
     } else {
       // Let's send error to user...
+      error = "authorization.errors.invalidEmail";
       dispatch("error", "authorization.errors.invalidEmail");
     }
   };
@@ -120,6 +121,8 @@
   let emailValidating = false;
   let emailInvalid;
 
+  let error;
+
   let previousEmail = null;
   
   // Let's export and determine one needed variable.
@@ -129,40 +132,48 @@
 <!-- 
   Layout
  -->
-<main class="px-4 md:px-16 lg:px-24">
+<main class="px-4 md:px-8 lg:px-12 w-full h-full py-6 md:py-12">
   <div class="w-full text-center">
-    <Heading>{$_("authorize.emailScreen.header", { default: "Let's login" })}</Heading>
-    <Caption>{$_("authorize.emailScreen.subheader", { default: "to continue using Wavees Services" })}</Caption>
+    <h1 class="text-xl font-semibold">{$_("authorize.emailScreen.header", { default: "Let's login" })}</h1>
+    <p class="text-sm text-gray-700">{$_("authorize.emailScreen.subheader", { default: "to continue using Wavees Services" })}</p>
   </div>
 
   <div class="mt-12 w-full flex flex-col justify-center items-center">
     <!-- Email input -->
     <div class="w-full">
       <TextInput on:keyup={(e) => {
+        error = null;
         dispatch("error", null);
       }} id="email" bind:value={email} on:keyup={(e) => keyup(e)} on:input={(e) => input(e)} fullWidth={true} type="email" title={$_("authorization.emailScreen.emailInput", { default: "Your email" })} placeholder="*******@user.com">
       </TextInput>
     </div>
     
     <!-- Buttons -->
-    <div class="mt-8 w-full">
+    <div class="mt-8 w-full px-4 md:px-6 flex flex-col justify-center">
       <Button on:click={(e) => {
         process();
       }} fullWidth={true} roundedCorners="tl,bl,br">
         { #if emailValidating }
           <Spinner size="15" color="#fff" />
         { :else }
-          {$_("global.proceed", { default: "Proceed" })}
+          {#if error != null}
+            <!-- Icon -->
+            <img style="width: 1.2rem;" src="./icons/alert-circle.svg" alt="Error Icon">
+
+            <p class="mx-4">{$_(error, { default: "Unknown Error" })}</p>
+          { :else }
+            {$_("global.proceed", { default: "Proceed" })}          
+          {/if}
         { /if }
       </Button>
 
-      <!-- <Button fullWidth={true} type="ghost" margin="mt-4">
-        Use another Authorization method
-      </Button>  -->
+      <Button on:click={() => dispatch("providerChange")} fullWidth={true} type="ghost" margin="mt-4">
+        Use another method
+      </Button> 
     </div>
 
     <!-- Disclaimer -->
-    <div class="mt-6 w-full text-center">
+    <div class="mt-4 w-full text-center">
       <Caption>{$_("authorize.dislaimer", { default: "By continuing, you agree to our terms of use." })}</Caption>
     </div>
   </div>

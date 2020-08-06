@@ -37,6 +37,8 @@
 
     Spinner } from "darkmode-components/src/index";
 
+  import Profile from "../../components/Profile.svelte";
+
   let error;
   let step = "check";
   let loading = true;
@@ -46,11 +48,21 @@
   function changeProvider(provider) {
     // Let's firstly clear some variables
     error = null;
-    step = "check";
     loading = true;
 
-    // And now let's just change our provider.
-    provider = providers.getProvider(provider).module;
+    // Let's now add some "settings" to our
+    // url and then let's just reload current page.
+    
+    // Construct URLSearchParams object instance from current URL querystring.
+    let queryParams = new URLSearchParams(window.location.search);
+     
+    // Set new or modify existing parameter value. 
+    queryParams.set("providerId", provider);
+     
+    // Replace current querystring with the new one.
+    history.replaceState(null, null, `${location.pathname}?${queryParams.toString()}`);
+  
+    location.reload();
   };
 
   // Small function, that'll
@@ -105,6 +117,9 @@
         // Default:
         // let's call provider's
         // check function.
+
+        console.log("PROVIDER CHECK");
+        console.log(provider);
         provider.check()
         .then((state) => {
           loading = false;
@@ -135,6 +150,8 @@
     }
   ];
 
+  let backLoading = false;
+
 </script>
 
 <svelte:head>
@@ -160,7 +177,7 @@
   {/if}
 
   <!-- Header -->
-  <div class="absolute inset-x-0 top-0 px-2 md:px-6 lg:px-8 hidden py-6 lg:py-8 md:flex justify-between">
+  <div class="absolute inset-x-0 top-0 px-2 md:px-6 lg:px-8 hidden py-6 lg:py-8 md:flex justify-between items-center">
     <!-- Logotype -->
     <h1 style="font-family: Junegull" class="text-white text-xl">wavees</h1>
   
@@ -180,24 +197,87 @@
     <!-- Tile -->
     <div class="relative h-full flex flex-col justify-center items-center bg-white rounded-lg shadow-xl">
       <!-- 
+        @step ProviderChange
+        Here we'll show all available
+        Authorization Providers.
+      -->
+      { #if step == "providerChange" }
+        <div class="w-full h-full flex flex-col justify-start px-4 md:px-6 pt-6 md:pt-12">
+          <div class="text-center">
+            <h1 class="text-xl font-semibold">Choose your Provider</h1>
+            <p class="text-sm text-gray-700">to continue using Wavees Services</p>
+          </div>
+
+          <!-- List of all providers -->
+          
+          <div style="overflow-y: scroll;" class="my-6 w-full flex-grow relative">
+            <div style="overflow-y: scroll;" class="absolute pl-4 w-full h-full">
+              <!-- @provider Default -->
+              <div on:click={(e) => {
+                changeProvider("default");
+              }} style="cursor: pointer;" class="my-4 px-4 md:px-8 w-full h-16 bg-gray-200 hover:bg-gray-400 rounded-lg items-center flex justify-start">
+                <!-- Logotype -->
+                <span class="rounded-full w-8 h-8 flex justify-center items-center text-center bg-black">
+                  <p style="font-family: Junegull; font-size: 1rem;" class="text-white">w</p>
+                </span>
+
+                <div class="mx-4">
+                  <h1 class="font-semibold">Default</h1>
+                  <p class="text-xs text-gray-700">Authorize using Wavees Service</p>
+                </div>
+              </div>
+
+              <!-- @provider Discord -->
+              <div on:click={(e) => {
+                changeProvider("discord");
+              }} style="cursor: pointer;" class="w-full my-4 px-4 md:px-8 h-16 bg-gray-200 hover:bg-gray-400 rounded-lg items-center flex justify-start">
+                <!-- Logotype -->
+                <span class="rounded-full flex justify-center items-center w-8 h-8 bg-blue-500">
+                  <img style="width: 1.4rem;" src="./logotypes/discord.svg" alt="Discord Logotype">
+                </span>
+
+                <div class="mx-4">
+                  <h1 class="font-semibold">Discord</h1>
+                  <p class="text-xs text-gray-700">Authorize using <span class="border-b-2 border-dotted border-gray-700">Discord.com</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          
+          <!-- Button: Add new account -->
+          <div class="w-full flex justify-center pb-2">
+            <Button on:click={(e) => {
+              backLoading = true;
+              check();
+            }} type="ghost" margin="py-0">
+              {#if backLoading}
+                <Spinner size="15" />
+              { :else }
+                Back
+              {/if}
+            </Button>
+          </div>
+        </div>
+      <!-- 
         @step Choose account
         In this step we'll ask user
         to choose one account. 
       -->
-      { #if step == "accounts" }
+      { :else if step == "accounts" }
 
-        <div class="w-full h-full px-4 md:px-8 py-6 flex flex-col">
+        <div class="w-full h-full px-4 md:px-8 pt-6 md:pt-12 flex flex-col">
           <!-- Text -->
           <div class="text-center">
-            <Heading>Choose account</Heading>
-            <Caption>to continue using Wavees Services</Caption>
+            <h1 class="text-xl font-semibold">Choose account</h1>
+            <p class="text-sm text-gray-700">to continue using Wavees Services</p>
           </div>
 
           <!-- Let's now list all user accounts -->
           <div style="overflow-y: scroll;" class="my-6 w-full flex-grow relative">
             <div style="overflow-y: scroll;" class="absolute pl-4 w-full h-full">
               {#each $user.tokens as token}
-                <svelte:component this={provider.components.profile} token="{token}" />
+                <Profile token={token} />
               {/each}
             </div>
           </div>
@@ -219,6 +299,7 @@
         <svelte:component this={provider.pages.identity} 
           on:error={(e) => error = e.detail}
           on:check={() => check() } 
+          on:providerChange={() => step = "providerChange"}
         />
       <!-- 
         @step Authorization
@@ -229,7 +310,9 @@
       { :else if step == "authorization" }
         <svelte:component this={provider.pages.authorization}
           on:error={(e) => error = e.detail}
-          on:check={() => check()} />
+          on:check={() => check()}
+          on:providerChange={() => step = "providerChange"} 
+        />
       <!-- 
         @step Account Creation
         Here we'll show page, where user
@@ -239,33 +322,11 @@
       { :else if step == "create" }
         <svelte:component this={provider.pages.create}
           on:error={(e) => error = e.detail}
-          on:check={() => check()} />
-      {/if}
-
-      <!-- Error status -->
-      {#if error != null}
-        <div transition:slide class="py-4">
-          <Caption>{$_(error, { default: error })}</Caption>
-        </div>
+          on:check={() => check()}
+          on:providerChange={() => step = "providerChange"} 
+        />
       {/if}
     </div>
     <!-- </Tile> -->
   </div>
-
-  <!-- Change language and copyright -->
-  <!-- <div class="absolute inset-x-0 bottom-0 w-full flex justify-center items-center py-6">
-    
-    #Smol language picker
-    <div class="flex">
-      <button on:click={(e) => {
-        cookies.set("_language", "ru");
-        locale.set("ru");
-      }} class="mx-2 {$locale.includes("ru") ? "text-gray-800" : "text-gray-500"}">RU</button>
-      
-      <button on:click={(e) => {
-        cookies.set("_language", "en");
-        locale.set("en");
-      }} class="mx-2 {$locale.includes("en") ? "text-gray-800" : "text-gray-500"}">EN</button>
-    </div>
-  </div> -->
 </main>

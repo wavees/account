@@ -19,7 +19,7 @@
   // Here we'll just create our Discord Code
   // token and close our current window.
   onMount(() => {
-    let code = $page.query.code;
+    let code = $page.query.token;
 
     cookies.set("_discord_code", code);
 

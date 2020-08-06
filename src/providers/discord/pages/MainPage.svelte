@@ -3,13 +3,16 @@
   import axios from "axios";
   import { onMount } from "svelte";
 
-  import api from "../../../config/application/api.js";
+  // Event Dispatcher
+  import { createEventDispatcher } from "svelte";
+  const dispatch = createEventDispatcher();
 
+  import moment from "moment";
+  import api from "../../../config/application/api.js";
   import authorizeUser from "../methods/login.js";
 
-  import { stores } from "@sapper/app";
-
   // Let's get page store
+  import { stores } from "@sapper/app";
   const { page } = stores();
 
   // Cookie Manager
@@ -46,7 +49,7 @@
 
     // And now let's open new window
     // with discord authorization page.
-    let discordURI = "https://discord.com/api/oauth2/authorize?client_id=740588352117538848&redirect_uri=https%3A%2F%2Faccount.wavees.ml%2Fauthorize%2Fprovider%2Fdiscord&response_type=code&scope=identify%20email";
+    let discordURI = "https://discord.com/api/oauth2/authorize?client_id=740588352117538848&redirect_uri=https%3A%2F%2Fapi.wavees.ml%2Fprovider%2Fdiscord&response_type=code&scope=identify%20email";
     // https://discord.com/api/oauth2/authorize?client_id=740588352117538848&redirect_uri=https%3A%2F%2Faccount.wavees.ml%2Fauthorize%2Fprovider%2Fdiscord&response_type=code&scope=email%20identify
     
     // Let's firstly prepare our popup window
@@ -70,13 +73,13 @@
         // get token for this account
         // and then we need to proceed
         // with login procedure.
-        step = "Checking for Discord Account";
-
         let code = cookies.get('_discord_code');
 
         // Let's now get user token for this
         // account.
         if (!authorizing) {
+          step = "Checking for Discord Account";
+
           authorizing = true;
 
           // And now let's authorize our
@@ -93,6 +96,7 @@
 
           authorizeUser(code, type, session)
           .then((response) => {
+            console.log(response);
             if (response.token != null) {
               cookies.set('_account_token', response.token, { 
                 path: "/",
@@ -107,6 +111,8 @@
               dispatch("error", "authorization.errors.invalidPincode");
             }
           }).catch((error) => {
+            console.log("ERROR");
+            console.log(error);
             // Error Handling
           });
         };
