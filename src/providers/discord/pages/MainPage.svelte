@@ -46,11 +46,12 @@
 
     // And now let's open new window
     // with discord authorization page.
-    let discordURI = "https://discord.com/api/oauth2/authorize?client_id=740588352117538848&redirect_uri=https%3A%2F%2Faccount.wavees.ml%2Fauthorize%2Fprovider%2Fdiscord&response_type=code&scope=email%20identify";
-
+    let discordURI = "https://discord.com/api/oauth2/authorize?client_id=740588352117538848&redirect_uri=https%3A%2F%2Faccount.wavees.ml%2Fauthorize%2Fprovider%2Fdiscord&response_type=code&scope=identify%20email";
+    // https://discord.com/api/oauth2/authorize?client_id=740588352117538848&redirect_uri=https%3A%2F%2Faccount.wavees.ml%2Fauthorize%2Fprovider%2Fdiscord&response_type=code&scope=email%20identify
+    
     // Let's firstly prepare our popup window
     let height = screen.height;
-    let width = 500;
+    let width = screen.width / 3;
 
     let left = (screen.width - width) / 2;
     let top = (screen.height - height) / 4;
@@ -85,7 +86,7 @@
 
           // Now let's determine type of
           // our action.
-          if ($page.paradms.id == "add") {
+          if ($page.params.id == "add") {
             type = "sessionAdd";
             session = cookies.get('_account_token');
           };
