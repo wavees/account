@@ -4,6 +4,7 @@
   import api from "../config/application/api.js";
   import { onMount } from "svelte";
 
+  import Callback from "../helpers/callback.js";
   import providers from "../config/stores/providers.js";
 
   // Importing components
@@ -22,8 +23,6 @@
     axios.get(`${api.url}/${api.version}/account/${token}`)
     .then((response) => {
       let data = response.data;
-      console.log("DATA:");
-      console.log(data);
 
       provider = providers.getProvider(data.provider).module;
 
@@ -46,6 +45,7 @@
     // And now we just need to call
     // our provider method and redirect our
     // user.
+    Callback(token);
   };
 
   let user = {};
