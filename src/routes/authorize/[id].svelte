@@ -11,6 +11,7 @@
   import { stores } from "@sapper/app";
 
   import Cookie from "cookie-universal";
+  import CallbackHelper from "../../helpers/callback.js";
 
   // Cookies manager
   const cookies = Cookie();
@@ -63,6 +64,33 @@
     history.replaceState(null, null, `${location.pathname}?${queryParams.toString()}`);
   
     location.reload();
+  };
+
+  let currentToken;
+
+  // Function, that'll handle
+  // callback-related things.
+  function callback(token) {
+    // Let's firstly get our
+    // callback url and check something...
+    let url = $page.params.id;
+
+    console.log("TOKEN:");
+    console.log(token);
+
+    console.log(url);
+
+    if (token == null) {
+      token = cookies.get('_account_token', { path: "/" });
+    };
+
+    if (url.includes('http')) {
+      currentToken = token;
+      step = "approveCallback";
+    } else {
+      console.log("CALLBACK")
+      CallbackHelper(token);
+    }
   };
 
   // Small function, that'll
@@ -122,6 +150,10 @@
         .then((state) => {
           loading = false;
           step = state;
+
+          if (state == "callback") {
+            callback();
+          };
         });
 
         break;
@@ -194,12 +226,34 @@
     
     <!-- Tile -->
     <div class="relative h-full flex flex-col justify-center items-center bg-white rounded-lg shadow-xl">
+      { #if step == "approveCallback" }
+        <div class="w-full h-full flex justify-center items-center">
+          <div class="text-center px-4 md:px-8 lg:px-12">
+            <!-- Some Texts -->
+            <h1 class="text-xl font-semibold">Approve redirect</h1>
+            <p class="text-sm text-gray-700">This site (<span class="border-b-2 border-dotted border-gray-700">{$page.params.id}</span>) is not registered on the Wavees network. This may mean that this site is trying to trick you into using your own data. Do you agree to grant this site access to your data?</p>
+
+            <!-- Buttons -->
+            <div class="mt-6 w-full flex flex-col justify-center">
+              <!-- Agree -->
+              <Button on:click={(e) => {
+                if (currentToken == null) currentToken = cookies.get("_account_token", { path: "/" });
+
+                CallbackHelper(currentToken);
+              }} fullWidth={true}>Agree</Button>
+
+              <!-- Cancel -->
+              <Button type="ghost" fullWidth={true}>Cancel</Button>
+            </div>
+          </div>
+        </div>
+
       <!-- 
         @step ProviderChange
         Here we'll show all available
         Authorization Providers.
       -->
-      { #if step == "providerChange" }
+      { :else if step == "providerChange" }
         <div class="w-full h-full flex flex-col justify-start px-4 md:px-6 pt-6 md:pt-12">
           <div class="text-center">
             <h1 class="text-xl font-semibold">Choose your Provider</h1>
@@ -275,7 +329,7 @@
           <div style="overflow-y: scroll;" class="my-6 w-full flex-grow relative">
             <div style="overflow-y: scroll;" class="absolute pl-4 w-full h-full">
               {#each $user.tokens as token}
-                <Profile token={token} />
+                <Profile on:callback={(e) => callback(e.detail)} token={token} />
               {/each}
             </div>
           </div>
@@ -285,7 +339,7 @@
             <Button on:click={(e) => {
                 let url = $page.params.id;
 
-                window.location.href = `/authorize/add?return=authorize/${url}`;
+                window.location.href = `/authorize/add?return=authorize/${encodeURIComponent(url)}`;
               }} margin="py-0">
               Add new account
             </Button>
@@ -302,6 +356,7 @@
           on:error={(e) => error = e.detail}
           on:check={() => check() } 
           on:providerChange={() => step = "providerChange"}
+          on:callback={(e) => callback(e.detail)}
         />
       <!-- 
         @step Authorization
@@ -314,6 +369,7 @@
           on:error={(e) => error = e.detail}
           on:check={() => check()}
           on:providerChange={() => step = "providerChange"} 
+          on:callback={(e) => callback(e.detail)}
         />
       <!-- 
         @step Account Creation
@@ -326,6 +382,7 @@
           on:error={(e) => error = e.detail}
           on:check={() => check()}
           on:providerChange={() => step = "providerChange"} 
+          on:callback={(e) => callback(e.detail)}
         />
       {/if}
     </div>

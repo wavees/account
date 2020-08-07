@@ -4,7 +4,9 @@
   import api from "../config/application/api.js";
   import { onMount } from "svelte";
 
-  import Callback from "../helpers/callback.js";
+  import { createEventDispatcher } from "svelte";
+  const dispatch = createEventDispatcher();
+
   import providers from "../config/stores/providers.js";
 
   // Importing components
@@ -45,7 +47,7 @@
     // And now we just need to call
     // our provider method and redirect our
     // user.
-    Callback(token);
+    dispatch("callback", token);
   };
 
   let user = {};

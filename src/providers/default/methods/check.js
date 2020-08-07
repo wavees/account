@@ -35,7 +35,7 @@ const check = () => {
           // Let's just redirect our user to
           // needed url.
           cookies.remove("_logged_in");
-          Callback(cookies.get("_account_token", { path: "/" }));
+          resolve("callback");
 
           return;
         };
@@ -48,11 +48,10 @@ const check = () => {
       axios.get(`${api.url}/${api.version}/account/${token}`)
       .then((response) => {
         let data = response.data;
-        console.log("CALLBACK YEAH");
 
         // Okay, so our user is logged in.
         // And now we just need to redirect him.
-        Callback(token);
+        resolve("callback");
       }).catch(() => {
         // This token doesn't exist,
         // so now we need to check user's

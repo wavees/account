@@ -11,8 +11,7 @@
   import api from "../../../config/application/api.js";
   import authorizeUser from "../methods/login.js";
 
-  import Callback from "../../../helpers/callback.js";
-
+ 
   // Let's get page store
   import { stores } from "@sapper/app";
   const { page } = stores();
@@ -106,7 +105,7 @@
               // And let's delete _login_email cookie
               cookies.remove('_login_email');
 
-              Callback(response.token);
+              dispatch("callback");
             } else {
               loading = false;
               dispatch("error", "authorization.errors.invalidPincode");

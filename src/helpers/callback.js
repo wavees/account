@@ -53,11 +53,31 @@ export default (token) => {
       let redirect = object.query.return;
       
       if (redirect != null) {
-        window.location.href = `${redirect}`;
+        // Let's firstly prepare our url.
+        let uri = encodeURIComponent(redirect);
+
+        if (uri.includes("authorize")) {
+          uri = uri.replace("authorize%2F", "authorize/")
+        };
+
+        window.location.href = `${uri}`;
       } else {
         // Let's just redirect our user
         // to home page.
-        window.location.href = `/`;
+
+        // And now we need to check if we need
+        // to redirect our
+        if (id.includes('http')) {
+          if (id.includes(":code")) {
+            let url = id.replace(":code", token);
+
+            window.location.href = url;
+          } else {
+            window.location.href = `${id}?code=${token}`;
+          }
+        } else {
+          window.location.href = `/`;
+        };
       };
     }
   });
