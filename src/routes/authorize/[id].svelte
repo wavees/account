@@ -118,8 +118,6 @@
         // let's call provider's
         // check function.
 
-        console.log("PROVIDER CHECK");
-        console.log(provider);
         provider.check()
         .then((state) => {
           loading = false;
@@ -284,7 +282,11 @@
 
           <!-- Button: Add new account -->
           <div class="w-full flex justify-center pb-2">
-            <Button margin="py-0">
+            <Button on:click={(e) => {
+                let url = $page.params.id;
+
+                window.location.href = `/authorize/add?return=authorize/${url}`;
+              }} margin="py-0">
               Add new account
             </Button>
           </div>

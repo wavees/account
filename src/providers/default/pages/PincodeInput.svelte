@@ -86,6 +86,11 @@
             path: "/",
             expires: moment().add('1', 'year').toDate()
           });
+          
+          cookies.set('_logged_in', true, {
+            path: "/",
+            expires: moment().add('15', "seconds").toDate()
+          });
           // And let's delete _login_email cookie
           cookies.remove('_login_email');
 

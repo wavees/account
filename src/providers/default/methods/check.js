@@ -3,7 +3,7 @@ import axios from "axios"
 import { stores } from "@sapper/app";
 
 import api from "../../../config/application/api";
-import Callback from "./callback.js";
+import Callback from "../../../helpers/callback.js";
 
 // Cookies manager
 import Cookie from "cookie-universal";
@@ -28,10 +28,17 @@ const check = () => {
       // Let's firstly get user's current
       // token and page id.
       let token;
-      console.log("ID:")
-      console.log(id);
       if (id != "add") {
         token = cookies.get("_account_token", { path: "/" });
+      } else {
+        if (cookies.get("_logged_in", { path: "/" })) {
+          // Let's just redirect our user to
+          // needed url.
+          cookies.remove("_logged_in");
+          Callback(cookies.get("_account_token", { path: "/" }));
+
+          return;
+        };
       };
 
       let email = cookies.get("_login_email", { path: "/" });
@@ -41,7 +48,8 @@ const check = () => {
       axios.get(`${api.url}/${api.version}/account/${token}`)
       .then((response) => {
         let data = response.data;
-        
+        console.log("CALLBACK YEAH");
+
         // Okay, so our user is logged in.
         // And now we just need to redirect him.
         Callback(token);
