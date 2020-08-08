@@ -119,13 +119,28 @@
       };
     }, 100);
   }
+
+  function goBack() {
+    // Construct URLSearchParams object instance from current URL querystring.
+    let queryParams = new URLSearchParams(window.location.search);
+    
+    // Set new or modify existing parameter value. 
+    queryParams.set("providerId", null);
+    
+    // Replace current querystring with the new one.
+    history.replaceState(null, null, `${location.pathname}?${queryParams.toString()}`);
+  
+    location.reload();
+  };
+
+  let backLoading;
 </script>
 
 <!-- 
   Layout
  -->
 <main class="px-4 md:px-16 lg:px-24 flex justify-center items-center">
-  <div class="flex flex-col justify-center text-center w-full h-full">
+  <div class="flex flex-col justify-center text-center w-full h-full pt-4">
     <!-- Text and Spinner -->
     <div>
       <span>
@@ -138,10 +153,21 @@
     <!-- Some buttons -->
     <div class="mt-6">
       <Button on:click={(e) => {
+        backLoading = true;
+        goBack();
+      }} fullWidth={true}>
+        {#if backLoading}
+          <Spinner color="#fff" size="15" />
+        { :else }
+          Go back
+        {/if}
+      </Button>
+
+      <!-- <Button on:click={(e) => {
         login();
       }} type="ghost" fullWidth={true}>
         Reload
-      </Button>
+      </Button> -->
     </div>
   </div>
 

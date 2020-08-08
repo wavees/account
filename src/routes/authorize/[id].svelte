@@ -75,11 +75,6 @@
     // callback url and check something...
     let url = $page.params.id;
 
-    console.log("TOKEN:");
-    console.log(token);
-
-    console.log(url);
-
     if (token == null) {
       token = cookies.get('_account_token', { path: "/" });
     };
@@ -88,7 +83,6 @@
       currentToken = token;
       step = "approveCallback";
     } else {
-      console.log("CALLBACK")
       CallbackHelper(token);
     }
   };
@@ -243,7 +237,7 @@
               }} fullWidth={true}>Agree</Button>
 
               <!-- Cancel -->
-              <Button type="ghost" fullWidth={true}>Cancel</Button>
+              <Button type="ghost" on:click={(e) => step = "accounts"} fullWidth={true}>Cancel</Button>
             </div>
           </div>
         </div>
@@ -295,8 +289,7 @@
               </div>
             </div>
           </div>
-
-          
+  
           <!-- Button: Add new account -->
           <div class="w-full flex justify-center pb-2">
             <Button on:click={(e) => {
@@ -336,7 +329,7 @@
 
           <!-- Button: Add new account -->
           <div class="w-full flex justify-center pb-2">
-            <Button on:click={(e) => {
+            <Button type="ghost" on:click={(e) => {
                 let url = $page.params.id;
 
                 window.location.href = `/authorize/add?return=authorize/${encodeURIComponent(url)}`;
