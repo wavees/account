@@ -133,6 +133,8 @@
         // page to our user.
         loading = false;
         step = "accounts"
+
+        buttonLoading = false;
         break;
     
       default:
@@ -148,6 +150,8 @@
           if (state == "callback") {
             callback();
           };
+
+          buttonLoading = false;
         });
 
         break;
@@ -174,7 +178,7 @@
     }
   ];
 
-  let backLoading = false;
+  let buttonLoading = false;
 
 </script>
 
@@ -234,7 +238,13 @@
                 if (currentToken == null) currentToken = cookies.get("_account_token", { path: "/" });
 
                 CallbackHelper(currentToken);
-              }} fullWidth={true}>Agree</Button>
+              }} fullWidth={true}>
+                {#if buttonLoading}
+                  <Spinner color="#fff" size="15" />
+                { :else }
+                  Agree
+                {/if}
+              </Button>
 
               <!-- Cancel -->
               <Button type="ghost" on:click={(e) => step = "accounts"} fullWidth={true}>Cancel</Button>
@@ -293,10 +303,10 @@
           <!-- Button: Add new account -->
           <div class="w-full flex justify-center pb-2">
             <Button on:click={(e) => {
-              backLoading = true;
+              buttonLoading = true;
               check();
             }} type="ghost" margin="py-0">
-              {#if backLoading}
+              {#if buttonLoading}
                 <Spinner size="15" />
               { :else }
                 Back
