@@ -43,11 +43,7 @@
 	<div style="height: 100vh; background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[4]}" class="w-full flex justify-center items-center">
 		<!-- Branding -->
 		<div class="flex flex-col justify-center items-center">
-			<div class="flex mb-6 items-center">
-				<h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[2]}" class="text-3xl text-bold">wavees</h1>
-			</div>
-
-			<Spinner />
+			<Spinner size="15" />
 		</div>
 	</div>
 { /if }

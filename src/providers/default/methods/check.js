@@ -25,6 +25,7 @@ const check = () => {
     page.subscribe((object) => {
       const id = object.params.id;
       
+      console.log("SUBSCRIBED");
       // Let's firstly get user's current
       // token and page id.
       let token;
@@ -43,42 +44,54 @@ const check = () => {
 
       let email = cookies.get("_login_email", { path: "/" });
       
+      console.log("Email:");
+      console.log(email);
       // Let's now check this player's
       // token.
       axios.get(`${api.url}/${api.version}/account/${token}`)
       .then((response) => {
         let data = response.data;
+        console.log("CALLBACK");
 
         // Okay, so our user is logged in.
         // And now we just need to redirect him.
         resolve("callback");
       }).catch(() => {
+        console.log("NOT CALLBACK");
         // This token doesn't exist,
         // so now we need to check user's
         // email.
         axios.get(`${api.url}/${api.version}/user/check/${email}`)
         .then((response) => {
           let data = response.data;
+          console.log("AUTHORIZE");
+          console.log(data);
 
           // So this user exists. And now
           // we need to ask this user to
           // authorize.
           resolve("authorization");
         }).catch(() => {
+          console.log("NOT AUTHORIZE");
           // And now let's check if this email
           // exists at all.
           axios.get(`${api.url}/${api.version}/user/validate/${email}`)
           .then((response) => {
             let data = response.data;
+            console.log(data);
 
             // Email exists - show register screen
             if (data.valid) {
+              console.log("CREATE");
               resolve("create");
             // Email doesn't exists - show identity screen
             } else {
+              console.log("Identity");
               resolve("identity");
             };
           }).catch((error) => {
+            console.log("Error");
+            console.log(error);
             resolve("identity");
           });
         });

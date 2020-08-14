@@ -278,69 +278,71 @@
 { #if !loaded }
   <div style="z-index: 999;" class="absolute h-full w-full px-4 md:px-6">
     <div class="w-full h-full flex items-center justify-center bg-white">
-      <Spinner />
+      <Spinner size="15" />
     </div>
   </div>
 { /if }
 
-<main class="relative px-4 md:px-8 py-6 md:py-12">
-  <!-- 
-    Header
-  -->
-  <div class="w-full">
-    <!-- Some text -->
-    <div class="w-full text-center">
-      <h1 class="text-xl font-semibold">{$_("authorize.pincodeScreen.header", { default: "Write pincode" })}</h1>
-      <p class="text-sm text-gray-700">{$_("authorize.pincodeScreen.subheader", { default: "you received when you registered to log in" })}</p>
-    </div>
+<main class="relative px-4 md:px-8 h-full flex justify-center items-center">
+  <div>
+    <!-- 
+      Header
+    -->
+    <div class="w-full">
+      <!-- Some text -->
+      <div class="w-full text-center">
+        <h1 class="text-base font-semibold">{$_("authorize.pincodeScreen.header", { default: "Write pincode" })}</h1>
+        <p class="text-xs text-gray-700">{$_("authorize.pincodeScreen.subheader", { default: "you received when you registered to log in" })}</p>
+      </div>
 
-    <!-- User Profile card -->
-    <div class="mt-6 flex justify-center items-center">
-      <Avatar type="image" avatar={avatarImage} size={4.5} />
-    
-      <div class="mx-4">
-        <Text size="20px">{username == null ? $_("global.unknownUsername", { default: "Unknown user" }) : username}</Text>
-        <Caption>{email}</Caption>
+      <!-- User Profile card -->
+      <div class="mt-6 flex justify-center items-center">
+        <Avatar type="image" avatar={avatarImage} size={2.5} />
+      
+        <div class="mx-4">
+          <h1 class="font-semibold text-base">{username == null ? $_("global.unknownUsername", { default: "Unknown user" }) : username}</h1>
+          <p class="text-gray-700 text-xs">{email}</p>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Content -->
-  <div class="mt-8 w-full flex flex-col justify-center items-center px-2 md:px-8">
-    <div style="{$theme == "light" ? "color: #000;" : "color: #fff;"}" class="items-center text-center">
-      <input id="pincode-start" type="text" maxlength="1" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
-      <input id="pincode-2" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
-      <input id="pincode-3" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
-      <input id="pincode-4" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
-    </div>
+    <!-- Content -->
+    <div class="mt-8 w-full flex flex-col justify-center items-center px-2 md:px-8">
+      <div style="{$theme == "light" ? "color: #000;" : "color: #fff;"}" class="items-center text-center">
+        <input id="pincode-start" type="text" maxlength="1" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+        <input id="pincode-2" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+        <input id="pincode-3" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+        <input id="pincode-4" maxlength="1" type="text" class="m-2 pincode" on:keyup={(e) => keyup(e)}>
+      </div>
 
-    <!-- Buttons -->
-    <div class="mt-8 w-full flex">
-      <!-- Login button -->
-      <Button on:click={(e) => {
-        process();
-      }} fullWidth={true}>
-        { #if loading }
-          <Spinner size="15" color="#fff" />
-        { :else }
-          {$_("global.login", { default: "Login" })}
-        { /if }
-      </Button>
-      
-      <!-- Back Button -->
-      <Button on:click={(e) => {
-        cookies.remove('_login_email');
-        backLoading = true;
+      <!-- Buttons -->
+      <div class="mt-8 w-full flex justify-between">
+        <!-- Login button -->
+        <button class="flex w-full items-center text-sm rounded-lg h-8 bg-black text-white flex justify-center items-center text-center hover:bg-blue-300" on:click={(e) => {
+          process();
+        }}>
+          { #if loading }
+            <Spinner size="12" color="#fff" />
+          { :else }
+            {$_("global.login", { default: "Login" })}
+          { /if }
+        </button>
+        
+        <!-- Back Button -->
+        <button class="h-8 flex items-center justify-center w-full" on:click={(e) => {
+          cookies.remove('_login_email');
+          backLoading = true;
 
-        dispatch("error", null);
-        dispatch("check");
-      }} fullWidth={true} type="ghost">
-        {#if backLoading}
-          <Spinner size="15" />
-        { :else }
-          { $_("global.back", { default: "Back" }) }
-        {/if}
-      </Button>
+          dispatch("error", null);
+          dispatch("check");
+        }}>
+          {#if backLoading}
+            <Spinner size="12" />
+          { :else }
+            { $_("global.back", { default: "Back" }) }
+          {/if}
+        </button>
+      </div>
     </div>
   </div>
 </main>

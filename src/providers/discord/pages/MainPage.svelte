@@ -31,16 +31,6 @@
   // authorization step.
   let step = "Preparing things";
 
-  // onMount event
-  // Here we'll redirect
-  // our user to Discord Login
-  // page and we'll monitor
-  // current authorization state.
-  onMount(() => {
-    // Let's just call
-    login();
-  });
-
   // Function, that'll handle all
   // discord-login related things
   function login() {
@@ -62,7 +52,6 @@
     window.open(discordURI, "Wavees Authorization using Discord Account", 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + width + ', height=' + height + ', top=' + top + ', left=' + left);
   
     step = "Waiting for you to Login";
-    let authorizing = false;
 
     // Here we'll wait for user login
     // credentials
@@ -133,46 +122,120 @@
     location.reload();
   };
 
+  let authorizing = false;
   let backLoading;
 </script>
 
 <!-- 
   Layout
  -->
-<main class="px-4 md:px-16 lg:px-24 flex justify-center items-center">
-  <div class="flex flex-col justify-center text-center w-full h-full pt-4">
+<main class="relative h-full flex justify-center items-center">
+  <div class="flex flex-col justify-center text-center px-4 md:px-6 lg:px-12">
     <!-- Text and Spinner -->
-    <div>
-      <span>
-        <Spinner />
-      </span>
-      
-      <p class="text-gray-700 text-sm mt-6">{step}</p>
-    </div>
+    {#if authorizing}
+      <div>
+        <span>
+          <Spinner size="15" />
+        </span>
+        
+        <p class="text-gray-700 text-sm mt-6">{step}</p>
 
-    <!-- Some buttons -->
-    <div class="mt-6">
-      <Button on:click={(e) => {
-        backLoading = true;
-        goBack();
-      }} fullWidth={true}>
-        {#if backLoading}
-          <Spinner color="#fff" size="15" />
-        { :else }
-          Go back
-        {/if}
-      </Button>
+        <!-- Buttons -->
+        <div class="mt-4">
+          <button on:click={(e) => {
+            backLoading = true;
+            goBack();
+          }} class="w-full text-white text-sm rounded-lg bg-black h-8 { backLoading ? "" : "hover:bg-blue-300" }">
+            {#if backLoading}
+              <Spinner size="12" color="#fff" />
+            { :else }
+              Cancel
+            {/if}
+          </button>
+        </div>
+      </div>
+    { :else }
+      <!-- Log in information -->
+      <h1 class="text-base font-semibold">Log in using <span class="border-b-1 border-dotted border-gray-800">Discord.com</span></h1>
+      <p class="text-sm text-gray-700 mt-4">Before you go any further, you should know about what we will do with your Discord account.</p>
 
-      <!-- <Button on:click={(e) => {
-        login();
-      }} type="ghost" fullWidth={true}>
-        Reload
-      </Button> -->
-    </div>
+      <!-- List of things we will do with the user account -->
+      <div class="my-8">
+        <!-- Retrieve user Email and Information -->
+        <div class="w-full flex items-center">
+          <!-- Icon -->
+          <img style="height: 1rem;" src="./icons/checkmark.svg" alt="Checkmark">
+
+          <!-- Text -->
+          <p class="text-xs mx-2">Retrieve your Email and other information</p>
+        </div>
+
+        <!-- Retrieve user Server List -->
+        <div class="w-full flex items-center">
+          <!-- Icon -->
+          <img style="height: 1rem;" src="./icons/checkmark.svg" alt="Checkmark">
+
+          <!-- Text -->
+          <p class="text-xs mx-2">Get your servers list</p>
+        </div>
+
+        <!-- See Messages -->
+        <div class="w-full flex items-center">
+          <!-- Icon -->
+          <img style="height: 1rem;" src="./icons/x.svg" alt="x">
+
+          <!-- Text -->
+          <p class="text-xs mx-2">See messages</p>
+        </div>
+
+        <!-- Join/Leave Discord servers -->
+        <div class="w-full flex items-center">
+          <!-- Icon -->
+          <img style="height: 1rem;" src="./icons/x.svg" alt="x">
+
+          <!-- Text -->
+          <p class="text-xs mx-2">Join/Leave from Discord servers</p>
+        </div>
+
+        <!-- Any other evil things -->
+        <div class="w-full flex items-center">
+          <!-- Icon -->
+          <img style="height: 1rem;" src="./icons/x.svg" alt="x">
+
+          <!-- Text -->
+          <p class="text-xs mx-2">Any other evil things</p>
+        </div>
+      </div>
+
+      <!-- Buttons --> 
+      <div class="w-full flex items-center text-sm">
+        <!-- Agree -->
+        <button on:click={(e) => {
+          authorizing = true;
+          step = "Waiting for you to log in";
+
+          login();
+        }} class="w-full rounded-lg bg-black text-white h-8 flex items-center justify-center">
+          I agree
+        </button>
+
+        <!-- Cancel -->
+        <button on:click={(e) => {
+          backLoading = true;
+          goBack();
+        }} class="w-full">
+          {#if backLoading}
+            <Spinner size="12" />
+          { :else }
+            Cancel
+          {/if}
+        </button>
+      </div>
+    {/if}
   </div>
 
   <!-- Small Footer -->
   <div class="absolute inset-x-0 bottom-0 py-4 w-full text-center">
-    <p class="text-gray-700 text-xs">Please, don't close this window</p>
+    <p class="text-gray-700 text-extra-xs">Please, don't close this window</p>
   </div>
 </main>

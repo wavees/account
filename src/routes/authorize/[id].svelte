@@ -90,7 +90,6 @@
   // Small function, that'll
   // check our current state.
   function check() {
-
     // And now we need to check
     // a lot of different things...
 
@@ -195,35 +194,31 @@
     <div style="height: 100vh; z-index: 999; background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[4]}" class="absolute w-full flex justify-center items-center">
       <!-- Branding -->
       <div class="flex flex-col justify-center items-center">
-        <div class="flex mb-6 items-center">
-          <h1 style="font-family: Junegull; color: {$theme == "dark" ? $colors.light[2] : $colors.dark[2]}" class="text-3xl text-bold">wavees</h1>
-        </div>
-
-        <Spinner />
+        <Spinner size="15" />
       </div>
     </div>
   {/if}
 
   <!-- Header -->
-  <div class="absolute inset-x-0 top-0 px-2 md:px-6 lg:px-8 hidden py-6 lg:py-8 md:flex justify-between items-center">
+  <div class="absolute inset-x-0 top-0 px-2 md:px-6 lg:px-8 hidden py-3 md:flex justify-between items-center">
     <!-- Logotype -->
     <h1 style="font-family: Junegull" class="text-white text-xl">wavees</h1>
   
     <!-- Header Links -->
     <div class="flex items-center px-6 bg-white rounded-lg">
       {#each headerItems as item}
-        <a class="px-6 py-4 text-gray-800 hover:text-black text-xs" href="{item.link}">{item.title}</a>
+        <a class="px-6 py-3 text-gray-800 hover:text-black text-xs" href="{item.link}">{item.title}</a>
       {/each}
     </div>
   </div>
 
-  <div class="w-full lg:w-1/3 h-full py-4 md:py-8 lg:py-24 px-2 md:px-6 lg:px-8">
+  <div class="w-full lg:w-1/3 h-full py-4 md:py-8 lg:py-16 px-2 md:px-6 lg:px-8">
     <!-- 
       Wavees Authorization logotype
      -->
     
     <!-- Tile -->
-    <div class="relative h-full flex flex-col justify-center items-center bg-white rounded-lg shadow-xl">
+    <div class="relative h-full bg-white rounded-lg shadow-xl">
       { #if step == "approveCallback" }
         <div class="w-full h-full flex justify-center items-center">
           <div class="text-center px-4 md:px-8 lg:px-12">
@@ -251,76 +246,12 @@
             </div>
           </div>
         </div>
-
-      <!-- 
-        @step ProviderChange
-        Here we'll show all available
-        Authorization Providers.
-      -->
-      { :else if step == "providerChange" }
-        <div class="w-full h-full flex flex-col justify-start px-4 md:px-6 pt-6 md:pt-12">
-          <div class="text-center">
-            <h1 class="text-xl font-semibold">Choose your Provider</h1>
-            <p class="text-sm text-gray-700">to continue using Wavees Services</p>
-          </div>
-
-          <!-- List of all providers -->
-          
-          <div style="overflow-y: scroll;" class="my-6 w-full flex-grow relative">
-            <div style="overflow-y: scroll;" class="absolute pl-4 w-full h-full">
-              <!-- @provider Default -->
-              <div on:click={(e) => {
-                changeProvider("default");
-              }} style="cursor: pointer;" class="my-4 px-4 md:px-8 w-full h-16 bg-gray-200 hover:bg-gray-400 rounded-lg items-center flex justify-start">
-                <!-- Logotype -->
-                <span class="rounded-full w-8 h-8 flex justify-center items-center text-center bg-black">
-                  <p style="font-family: Junegull; font-size: 1rem;" class="text-white">w</p>
-                </span>
-
-                <div class="mx-4">
-                  <h1 class="font-semibold">Default</h1>
-                  <p class="text-xs text-gray-700">Authorize using Wavees Service</p>
-                </div>
-              </div>
-
-              <!-- @provider Discord -->
-              <div on:click={(e) => {
-                changeProvider("discord");
-              }} style="cursor: pointer;" class="w-full my-4 px-4 md:px-8 h-16 bg-gray-200 hover:bg-gray-400 rounded-lg items-center flex justify-start">
-                <!-- Logotype -->
-                <span class="rounded-full flex justify-center items-center w-8 h-8 bg-blue-500">
-                  <img style="width: 1.4rem;" src="./logotypes/discord.svg" alt="Discord Logotype">
-                </span>
-
-                <div class="mx-4">
-                  <h1 class="font-semibold">Discord</h1>
-                  <p class="text-xs text-gray-700">Authorize using <span class="border-b-2 border-dotted border-gray-700">Discord.com</span></p>
-                </div>
-              </div>
-            </div>
-          </div>
-  
-          <!-- Button: Add new account -->
-          <div class="w-full flex justify-center pb-2">
-            <Button on:click={(e) => {
-              buttonLoading = true;
-              check();
-            }} type="ghost" margin="py-0">
-              {#if buttonLoading}
-                <Spinner size="15" />
-              { :else }
-                Back
-              {/if}
-            </Button>
-          </div>
-        </div>
       <!-- 
         @step Choose account
         In this step we'll ask user
         to choose one account. 
       -->
       { :else if step == "accounts" }
-
         <div class="w-full h-full px-4 md:px-8 pt-6 md:pt-12 flex flex-col">
           <!-- Text -->
           <div class="text-center">
@@ -358,7 +289,7 @@
         <svelte:component this={provider.pages.identity} 
           on:error={(e) => error = e.detail}
           on:check={() => check() } 
-          on:providerChange={() => step = "providerChange"}
+          on:providerChange={(e) => changeProvider(e.detail)}
           on:callback={(e) => callback(e.detail)}
         />
       <!-- 
@@ -371,7 +302,7 @@
         <svelte:component this={provider.pages.authorization}
           on:error={(e) => error = e.detail}
           on:check={() => check()}
-          on:providerChange={() => step = "providerChange"} 
+          on:providerChange={(e) => changeProvider(e.detail)} 
           on:callback={(e) => callback(e.detail)}
         />
       <!-- 
@@ -384,7 +315,7 @@
         <svelte:component this={provider.pages.create}
           on:error={(e) => error = e.detail}
           on:check={() => check()}
-          on:providerChange={() => step = "providerChange"} 
+          on:providerChange={(e) => changeProvider(e.detail)} 
           on:callback={(e) => callback(e.detail)}
         />
       {/if}

@@ -1,7 +1,15 @@
 module.exports = {
   purge: [],
   theme: {
-    extend: {},
+    extend: {
+      fontSize: {
+        "extra-xs": "0.65rem"
+      },
+
+      borderWidth: {
+        "1": "1px"
+      }
+    },
   },
   variants: {},
   plugins: [],
