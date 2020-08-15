@@ -7,6 +7,7 @@
   import { onMount } from "svelte";
   import { slide } from "svelte/transition";
 
+  import { permissionsInfo as permissions } from "../../config/stores/permissions.js";
   import { user } from "../../config/stores/user.js";
   import api from "../../config/application/api.js";
 
@@ -209,6 +210,16 @@
   // and so on)
   onMount(() => {
     check();
+
+    // By the way, let's now preload
+    // information about all permissions, requested
+    // by this callback.
+    if ($page.query.permissions != null) {
+      let permissionsArray = ["readAvatar","readUsername"];
+      permissionsArray.push($page.query.permissions.split(","));
+
+      permissions.loadPermissions(permissionsArray);
+    };
   });
 
   // Header Items
@@ -288,29 +299,54 @@
         @step ApproveCallback
        -->
       { :else if step == "approveCallback" }
-        <div class="w-full h-full flex justify-center items-center">
-          <div class="text-center px-4 md:px-8 lg:px-12">
+        <div class="w-full h-full px-4 md:px-8 lg:px-12 pt-6 md:pt-8 flex justify-center items-center">
+          <div class="w-full h-full flex flex-col">
             <!-- Some Texts -->
-            <h1 class="text-xl font-semibold">Approve redirect</h1>
-            <p class="text-sm text-gray-700">This site (<span class="border-b-2 border-dotted border-gray-700">{$page.params.id}</span>) is not registered on the Wavees network. This may mean that this site is trying to trick you into using your own data. Do you agree to grant this site access to your data?</p>
+            <div class="text-center">
+              <h1 class="text-base font-semibold">Approve redirect</h1>
+              <p class="text-xs text-gray-700">This site (<span class="border-b-2 border-dotted border-gray-700">{$page.params.id}</span>) is not registered on the Wavees network. This may mean that this site is trying to trick you into using your own data. Do you agree to grant this site access to your data?</p>
+            
+              <h1 class="text-base mt-4">That's all this site will have acces to do:</h1>
+            </div>
+
+            <!-- Let's now list all user accounts -->
+            <div style="overflow: hidden; overflow-y: auto;" class="my-6 w-full flex-grow relative">
+              <div class="absolute w-full h-full">
+                {#if $permissions.loaded}
+                  {#each $permissions.list as permission}
+                    <div class="w-full flex items-start my-2">
+                      <!-- Icon -->
+                      <img style="height: 1rem;" src="./icons/checkmark.svg" alt="Checkmark">
+
+                      <!-- Text -->
+                      <p class="text-xs mx-2">{permission.title.ru}</p>
+                    </div>
+                  {/each}
+                { :else }
+                  <div class="w-full h-full flex justify-center items-center">
+                    <Spinner size="12" />
+                  </div>
+                {/if}
+              </div>
+            </div>
 
             <!-- Buttons -->
-            <div class="mt-6 w-full flex flex-col justify-center">
+            <div class="pb-6 w-full flex">
               <!-- Agree -->
-              <Button on:click={(e) => {
+              <button on:click={(e) => {
                 let token = currentToken == null ? $user.current.token : currentToken;
 
                 callback(token);
-              }} fullWidth={true}>
+              }} class="w-full bg-black text-white text-sm rounded-lg h-8 { buttonLoading ? "" : "hover:bg-blue-300" }">
                 {#if buttonLoading}
                   <Spinner color="#fff" size="15" />
                 { :else }
                   Agree
                 {/if}
-              </Button>
+              </button>
 
               <!-- Cancel -->
-              <Button type="ghost" on:click={(e) => step = "accounts"} fullWidth={true}>Cancel</Button>
+              <button type="ghost" on:click={(e) => step = "accounts"} class="w-full h-8">Cancel</button>
             </div>
           </div>
         </div>
