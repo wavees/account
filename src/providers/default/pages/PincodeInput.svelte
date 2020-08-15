@@ -318,7 +318,7 @@
       <!-- Buttons -->
       <div class="mt-8 w-full flex justify-between">
         <!-- Login button -->
-        <button class="flex w-full items-center text-sm rounded-lg h-8 bg-black text-white flex justify-center items-center text-center hover:bg-blue-300" on:click={(e) => {
+        <button class="flex w-full items-center text-sm rounded-lg h-8 bg-black text-white flex justify-center items-center text-center { loading ? "" : "hover:bg-blue-300" }" on:click={(e) => {
           process();
         }}>
           { #if loading }

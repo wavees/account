@@ -55,12 +55,13 @@ export default (token) => {
       if (redirect != null) {
         // Let's firstly prepare our url.
         let uri = encodeURIComponent(redirect);
+        let query = new URLSearchParams(window.location.search);
 
         if (uri.includes("authorize")) {
           uri = uri.replace("authorize%2F", "authorize/")
         };
 
-        window.location.href = `${uri}`;
+        window.location.href = `${uri}?${query}`;
       } else {
         // Let's just redirect our user
         // to home page.

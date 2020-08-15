@@ -114,7 +114,7 @@
     let queryParams = new URLSearchParams(window.location.search);
     
     // Set new or modify existing parameter value. 
-    queryParams.set("providerId", null);
+    queryParams.delete("providerId");
     
     // Replace current querystring with the new one.
     history.replaceState(null, null, `${location.pathname}?${queryParams.toString()}`);

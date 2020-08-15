@@ -2,10 +2,13 @@
   // import
   import { _, locale } from "svelte-i18n";
   
+  import axios from "axios";
+
   import { onMount } from "svelte";
   import { slide } from "svelte/transition";
 
   import { user } from "../../config/stores/user.js";
+  import api from "../../config/application/api.js";
 
   import { goto } from "@sapper/app";
   import { stores } from "@sapper/app";
@@ -79,12 +82,55 @@
       token = cookies.get('_account_token', { path: "/" });
     };
 
-    if (url.includes('http')) {
-      currentToken = token;
-      step = "approveCallback";
-    } else {
+    if ($page.query.return != null) {
       CallbackHelper(token);
-    }
+    } else {
+      if (url.includes('http')) {
+        if (step == "approveCallback") {
+          duplicate(token);
+        } else {
+          currentToken = token;
+          step = "approveCallback";
+        };
+      } else {
+        duplicate(token);
+      };
+    };
+  };
+
+  // Function to handle redirect processes
+  function redirect() {
+    let redirect = $page.query.return;
+
+    // Let's firstly prepare our url.
+    let uri = encodeURIComponent(redirect);
+    let query = new URLSearchParams(window.location.search);
+
+    if (uri.includes("authorize")) {
+      uri = uri.replace("authorize%2F", "authorize/")
+    };
+
+    window.location.href = `${uri}?${query}`;
+  };
+
+  // Function, that'll handle duplication
+  // process for our token (and, by the way
+  // it'll also handle callback process; 
+  function duplicate(token) {
+    step = "duplicating";
+
+    // Let's prepare our new permissions.
+    let permissions = $page.query.permissions == null ? [] : Array.from($page.query.permissions.split(','));
+
+    axios.post(`${api.url}/${api.version}/token/${token}/duplicate`, { permissions })
+    .then((response) => {
+      let data = response.data;
+
+      CallbackHelper(data.token);
+    })
+    .catch((error) => {
+      console.log(error.response.data);
+    });
   };
 
   // Small function, that'll
@@ -179,6 +225,16 @@
 
   let buttonLoading = false;
 
+  // Function, that'll handle correct url
+  // changing process.
+  function urlChange(url, newQuery) {
+    let query = newQuery;
+    if (query == null) {
+      query = new URLSearchParams(window.location.search);
+    };
+
+    window.location.href = `${url}?${query}`;
+  };
 </script>
 
 <svelte:head>
@@ -219,7 +275,19 @@
     
     <!-- Tile -->
     <div class="relative h-full bg-white rounded-lg shadow-xl">
-      { #if step == "approveCallback" }
+      <!-- 
+        @step Duplicating
+       -->
+      { #if step == "duplicating" }
+        <div class="w-full h-full flex flex-col justify-center text-center items-center">
+          <Spinner size="15" />
+
+          <p class="text-sm mt-4">Duplicating your token...</p>
+        </div>
+      <!-- 
+        @step ApproveCallback
+       -->
+      { :else if step == "approveCallback" }
         <div class="w-full h-full flex justify-center items-center">
           <div class="text-center px-4 md:px-8 lg:px-12">
             <!-- Some Texts -->
@@ -230,9 +298,9 @@
             <div class="mt-6 w-full flex flex-col justify-center">
               <!-- Agree -->
               <Button on:click={(e) => {
-                if (currentToken == null) currentToken = cookies.get("_account_token", { path: "/" });
+                let token = currentToken == null ? $user.current.token : currentToken;
 
-                CallbackHelper(currentToken);
+                callback(token);
               }} fullWidth={true}>
                 {#if buttonLoading}
                   <Spinner color="#fff" size="15" />
@@ -252,31 +320,40 @@
         to choose one account. 
       -->
       { :else if step == "accounts" }
-        <div class="w-full h-full px-4 md:px-8 pt-6 md:pt-12 flex flex-col">
-          <!-- Text -->
-          <div class="text-center">
-            <h1 class="text-xl font-semibold">Choose account</h1>
-            <p class="text-sm text-gray-700">to continue using Wavees Services</p>
-          </div>
-
-          <!-- Let's now list all user accounts -->
-          <div style="overflow-y: scroll;" class="my-6 w-full flex-grow relative">
-            <div style="overflow-y: scroll;" class="absolute pl-4 w-full h-full">
-              {#each $user.tokens as token}
-                <Profile on:callback={(e) => callback(e.detail)} token={token} />
-              {/each}
+        <div class="w-full h-full px-4 md:px-8 pt-6 md:pt-8 flex justify-center items-center">
+          <div class="flex flex-col h-full w-full">
+            <!-- Text -->
+            <div class="text-center">
+              <h1 class="text-base font-semibold">Choose account</h1>
+              <p class="text-xs text-gray-700">to continue using Wavees Services</p>
             </div>
-          </div>
 
-          <!-- Button: Add new account -->
-          <div class="w-full flex justify-center pb-2">
-            <Button type="ghost" on:click={(e) => {
-                let url = $page.params.id;
+            <!-- Let's now list all user accounts -->
+            <div style="overflow: hidden; overflow-y: auto;" class="my-6 w-full flex-grow relative">
+              <div class="absolute w-full h-full">
+                {#each $user.tokens as token}
+                  <Profile on:callback={(e) => callback(e.detail)} token={token} />
+                {/each}
+              </div>
+            </div>
 
-                window.location.href = `/authorize/add?return=authorize/${encodeURIComponent(url)}`;
-              }} margin="py-0">
-              Add new account
-            </Button>
+            <!-- Button: Add new account -->
+            <div class="w-full flex justify-center pb-6 px-2">
+              <button class="text-sm rounded-lg w-full h-8 bg-black text-white { buttonLoading ? "" : "hover:bg-blue-300"}" on:click={(e) => {
+                  buttonLoading = true;
+
+                  let query = new URLSearchParams(window.location.search);
+                  query.set("return", `authorize/${$page.params.id}`);
+
+                  urlChange("/authorize/add", query);
+                }} margin="py-0">
+                  {#if buttonLoading}
+                    <Spinner size="12" color="#fff" />
+                  { :else }
+                    Add new account
+                  {/if}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -291,6 +368,8 @@
           on:check={() => check() } 
           on:providerChange={(e) => changeProvider(e.detail)}
           on:callback={(e) => callback(e.detail)}
+          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query)}
+          on:redirect={() => redirect()}
         />
       <!-- 
         @step Authorization
@@ -304,6 +383,8 @@
           on:check={() => check()}
           on:providerChange={(e) => changeProvider(e.detail)} 
           on:callback={(e) => callback(e.detail)}
+          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query)}
+          on:redirect={() => redirect()}
         />
       <!-- 
         @step Account Creation
@@ -317,6 +398,8 @@
           on:check={() => check()}
           on:providerChange={(e) => changeProvider(e.detail)} 
           on:callback={(e) => callback(e.detail)}
+          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query)}
+          on:redirect={() => redirect()}
         />
       {/if}
     </div>

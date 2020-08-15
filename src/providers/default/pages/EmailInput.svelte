@@ -166,7 +166,7 @@
       
       <!-- Buttons -->
       <div class="mt-12 w-full flex { $page.params.id == "add" ? "justify-between" : "justify-center px-4 md:px-6"}">
-        <button class="{ emailInvalid ? "opacity-75 cursor-not-allowed" : "hover:bg-blue-300" } w-full text-sm rounded-lg h-8 bg-black text-white flex justify-center text-center items-center" on:click={(e) => {
+        <button class="{ emailInvalid ? "opacity-75 cursor-not-allowed" : emailValidating ? "" : "hover:bg-blue-300" } w-full text-sm rounded-lg h-8 bg-black text-white flex justify-center text-center items-center" on:click={(e) => {
           process();
         }}>
           { #if emailValidating }
@@ -183,12 +183,14 @@
 
             let redirect = $page.query.return;
             let uri = encodeURIComponent(redirect);
+            let query = new URLSearchParams(window.location.search);
+            query.delete('return');
 
             if (uri.includes("authorize")) {
               uri = uri.replace("authorize%2F", "authorize/")
             };
 
-            window.location.href = `${uri}`;
+            dispatch("urlChange", { url: uri, query: query });
           }} class="h-8 w-full text-center flex justify-center items-center">
             {#if backButtonLoading}
               <Spinner size="12" />
