@@ -57,6 +57,8 @@ export default (token) => {
         let uri = encodeURIComponent(redirect);
         let query = new URLSearchParams(window.location.search);
 
+        query.remove('providerId');
+
         if (uri.includes("authorize")) {
           uri = uri.replace("authorize%2F", "authorize/")
         };
