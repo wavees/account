@@ -52,6 +52,7 @@
     window.open(discordURI, "Wavees Authorization using Discord Account", 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + width + ', height=' + height + ', top=' + top + ', left=' + left);
   
     step = "Waiting for you to Login";
+    let authorizationProcess;
 
     // Here we'll wait for user login
     // credentials
@@ -67,10 +68,10 @@
 
         // Let's now get user token for this
         // account.
-        if (!authorizing) {
+        if (!authorizationProcess) {
           step = "Checking for Discord Account";
 
-          authorizing = true;
+          authorizationProcess = true;
 
           // And now let's authorize our
           // user.
@@ -223,7 +224,7 @@
         <button on:click={(e) => {
           backLoading = true;
           goBack();
-        }} class="w-full">
+        }} class="w-full h-8">
           {#if backLoading}
             <Spinner size="12" />
           { :else }
