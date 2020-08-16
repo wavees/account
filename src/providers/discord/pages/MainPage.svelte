@@ -139,7 +139,7 @@
           <Spinner size="15" />
         </span>
         
-        <p class="text-gray-700 text-sm mt-6">{step}</p>
+        <p class="text-sm mt-6">{step}</p>
 
         <!-- Buttons -->
         <div class="mt-4">
