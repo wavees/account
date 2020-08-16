@@ -216,7 +216,7 @@
           step = "Waiting for you to log in";
 
           login();
-        }} class="w-full rounded-lg bg-black text-white h-8 flex items-center justify-center">
+        }} class="w-full rounded-lg bg-black text-white h-8 flex items-center justify-center hover:bg-blue-300">
           I agree
         </button>
 
