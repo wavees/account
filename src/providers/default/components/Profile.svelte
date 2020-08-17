@@ -4,12 +4,14 @@
     Avatar,
   } from "darkmode-components/src/index";
 
+  import { slide } from "svelte/transition";
+
   // And now let's export some variables.
   export let user;
 </script>
 
 <!-- Component Style -->
-<div class="px-6 py-4 w-full flex justify-between">
+<div transition:slide class="px-6 py-4 w-full flex justify-between">
   <div class="flex items-center">
     <div class="relative">
       <Avatar type="image" size="2.5" avatar="{user.avatar}" />

@@ -4,6 +4,8 @@
     Avatar,
   } from "darkmode-components/src/index";
 
+  import { slide } from "svelte/transition";
+
   // Small function, that'll
   // handle redirect process for
   // our profile.
@@ -19,7 +21,7 @@
 
 <!-- Component Style -->
 
-<div class="px-6 py-4 w-full flex justify-between">
+<div transition:slide class="px-6 py-4 w-full flex justify-between">
   <div class="flex items-center">
     <div class="relative">
       <Avatar type="image" size="2.5" avatar="{user.avatar}" />

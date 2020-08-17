@@ -1,13 +1,11 @@
 <script>
   // import
   import { _, locale } from "svelte-i18n";
-  
-	import { fade } from "svelte/transition";
 
   import axios from "axios";
 
   import { onMount } from "svelte";
-  import { slide } from "svelte/transition";
+  import { fade, slide } from "svelte/transition";
 
   import { permissionsInfo as permissions } from "../../config/stores/permissions.js";
   import { user } from "../../config/stores/user.js";
