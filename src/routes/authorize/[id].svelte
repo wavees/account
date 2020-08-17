@@ -2,6 +2,8 @@
   // import
   import { _, locale } from "svelte-i18n";
   
+	import { fade } from "svelte/transition";
+
   import axios from "axios";
 
   import { onMount } from "svelte";
@@ -26,7 +28,7 @@
   // And now we need to import
   // our authorization provider.
   import providers from "../../config/stores/providers.js";
-  let provider = providers.getProvider($page.query.providerId).module;
+  $: provider = providers.getProvider($page.query.providerId).module;
 
   // Importing components
   import { 
@@ -47,13 +49,15 @@
   let error;
   let step = "check";
   let loading = true;
+  let tileLoaded = true;
 
   // Function, that'll change
   // our login provider.
   function changeProvider(provider) {
+    tileLoaded = false;
+    
     // Let's firstly clear some variables
     error = null;
-    loading = true;
 
     // Let's now add some "settings" to our
     // url and then let's just reload current page.
@@ -65,9 +69,7 @@
     queryParams.set("providerId", provider);
      
     // Replace current querystring with the new one.
-    history.replaceState(null, null, `${location.pathname}?${queryParams.toString()}`);
-  
-    location.reload();
+    goto(`${location.pathname}?${queryParams.toString()}`, true);
   };
 
   let currentToken;
@@ -111,7 +113,7 @@
       uri = uri.replace("authorize%2F", "authorize/")
     };
 
-    window.location.href = `${uri}?${query}`;
+    goto(`${uri}?${query}`);
   };
 
   // Function, that'll handle duplication
@@ -178,9 +180,15 @@
         // Here we'll show accounts
         // page to our user.
         loading = false;
+
+        tileLoaded = false;
         step = "accounts"
 
         buttonLoading = false;
+
+        setTimeout(() => {
+          tileLoaded = true;
+        }, 50);
         break;
     
       default:
@@ -191,6 +199,8 @@
         provider.check()
         .then((state) => {
           loading = false;
+
+          tileLoaded = false;
           step = state;
 
           if (state == "callback") {
@@ -198,6 +208,10 @@
           };
 
           buttonLoading = false;
+
+          setTimeout(() => {
+            tileLoaded = true;
+          }, 50);
         });
 
         break;
@@ -244,7 +258,7 @@
       query = new URLSearchParams(window.location.search);
     };
 
-    window.location.href = `${url}?${query}`;
+    goto(`${url}?${query}`);
   };
 </script>
 
@@ -258,7 +272,7 @@
     Loading screen
   -->
   {#if step == "check" || loading}
-    <div style="height: 100vh; z-index: 999; background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[4]}" class="absolute w-full flex justify-center items-center">
+    <div out:fade style="z-index: 1000;" class="absolute w-full h-screen bg-white flex justify-center items-center">
       <!-- Branding -->
       <div class="flex flex-col justify-center items-center">
         <Spinner size="15" />
@@ -279,13 +293,21 @@
     </div>
   </div>
 
-  <div class="w-full lg:w-1/3 h-full py-4 md:py-8 lg:py-16 px-2 md:px-6 lg:px-8">
+  <div class="w-full lg:w-1/3 h-full md:py-8 lg:py-16 md:px-6 lg:px-8">
     <!-- 
       Wavees Authorization logotype
      -->
     
     <!-- Tile -->
-    <div class="relative h-full bg-white rounded-lg shadow-xl">
+    <div class="relative h-full bg-white md:rounded-lg shadow-xl">
+      {#if !tileLoaded}
+        <div style="z-index: 999;" out:fade class="absolute w-full h-full bg-white rounded-lg">
+          <div class="absolute inset-x-0 bottom-0 pb-2 w-full text-center">
+            <!-- <p class="text-extra-xs text-gray-600">Loading, please wait</p> -->
+          </div>
+        </div>
+      {/if}
+
       <!-- 
         @step Duplicating
        -->
@@ -406,6 +428,7 @@
           on:callback={(e) => callback(e.detail)}
           on:urlChange={(e) => urlChange(e.detail.url, e.detail.query)}
           on:redirect={() => redirect()}
+          on:loaded={(e) => { tileLoaded = e.detail; }}
         />
       <!-- 
         @step Authorization
@@ -421,6 +444,7 @@
           on:callback={(e) => callback(e.detail)}
           on:urlChange={(e) => urlChange(e.detail.url, e.detail.query)}
           on:redirect={() => redirect()}
+          on:loaded={(e) => { tileLoaded = e.detail; }}
         />
       <!-- 
         @step Account Creation
@@ -436,6 +460,7 @@
           on:callback={(e) => callback(e.detail)}
           on:urlChange={(e) => urlChange(e.detail.url, e.detail.query)}
           on:redirect={() => redirect()}
+          on:loaded={(e) => { tileLoaded = e.detail; }}
         />
       {/if}
     </div>

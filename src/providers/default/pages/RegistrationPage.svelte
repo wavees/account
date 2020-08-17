@@ -5,6 +5,8 @@
   import { createEventDispatcher } from "svelte";
   import Cookie from "cookie-universal";
 
+  import { onMount } from "svelte";
+
   // Cookie manager
   const cookies = Cookie();
 
@@ -12,7 +14,6 @@
   const dispatch = createEventDispatcher();
 
   let loading = false;
-
   // Importing components
   import {
     Spinner} from "darkmode-components/src/index"

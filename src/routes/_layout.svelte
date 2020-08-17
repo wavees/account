@@ -2,6 +2,8 @@
   // Let's import application's styles
   import Tailwind from "../styles/tailwind.svelte";
 
+	import { fade } from "svelte/transition";
+
   // import
 	import { user } from "../config/stores/user.js";
 	
@@ -40,7 +42,7 @@
 		<slot></slot>
 	</main>
 { :else }
-	<div style="height: 100vh; background-color: {$theme == "dark" ? $colors.dark[0] : $colors.light[4]}" class="w-full flex justify-center items-center">
+	<div out:fade class="w-full h-screen bg-white absolute flex justify-center items-center">
 		<!-- Branding -->
 		<div class="flex flex-col justify-center items-center">
 			<Spinner size="15" />

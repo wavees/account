@@ -76,6 +76,8 @@
     // Let's focus user to email input.
     let focusElement = document.getElementById("email");
     focusElement.focus();
+
+    dispatch("loaded", true);
   });
 
   // Function, that'll process given information

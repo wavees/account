@@ -7,6 +7,7 @@
 
   import axios from "axios";
 
+  import { fade } from "svelte/transition";
   import { stores } from "@sapper/app";
 
   // Let's get page store
@@ -276,7 +277,7 @@
   Let's check if we have loaded
   our user information or no. -->
 { #if !loaded }
-  <div style="z-index: 999;" class="absolute h-full w-full px-4 md:px-6">
+  <div out:fade style="z-index: 999;" class="absolute h-full w-full px-4 md:px-6">
     <div class="w-full h-full flex items-center justify-center bg-white">
       <Spinner size="15" />
     </div>

@@ -3,6 +3,8 @@
   import axios from "axios";
   import { onMount } from "svelte";
 
+  import { goto } from "@sapper/app";
+
   // Event Dispatcher
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
@@ -10,7 +12,6 @@
   import moment from "moment";
   import api from "../../../config/application/api.js";
   import authorizeUser from "../methods/login.js";
-
  
   // Let's get page store
   import { stores } from "@sapper/app";
@@ -26,6 +27,10 @@
 
     Spinner
   } from "darkmode-components/src/index";
+
+  onMount(() => {
+    dispatch("loaded", true);
+  }, 50);
 
   // Small Variable, that'll show our current
   // authorization step.
@@ -111,6 +116,7 @@
   }
 
   function goBack() {
+    dispatch("loaded", false);
     // Construct URLSearchParams object instance from current URL querystring.
     let queryParams = new URLSearchParams(window.location.search);
     
@@ -118,9 +124,7 @@
     queryParams.delete("providerId");
     
     // Replace current querystring with the new one.
-    history.replaceState(null, null, `${location.pathname}?${queryParams.toString()}`);
-  
-    location.reload();
+    goto(`${location.pathname}?${queryParams.toString()}`, true);
   };
 
   let authorizing = false;
@@ -131,7 +135,7 @@
   Layout
  -->
 <main class="relative h-full flex justify-center items-center">
-  <div class="flex flex-col justify-center text-center px-4 md:px-6 lg:px-12">
+  <div class="flex flex-col justify-center text-center px-12 md:px-6">
     <!-- Text and Spinner -->
     {#if authorizing}
       <div>
