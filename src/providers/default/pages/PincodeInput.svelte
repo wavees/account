@@ -105,9 +105,13 @@
           let query = new URLSearchParams(window.location.search);
           query.delete("providerId");
 
-          let redirect = $page.query.return;
+          let redirect = encodeURIComponent($page.query.return);
           if (redirect == null) {
             redirect = `/authorize/${$page.params.id}`;
+          };
+
+          if (redirect.includes("authorize")) {
+            redirect = redirect.replace("authorize%2F", "authorize/")
           };
 
           dispatch("urlChange", { url: `${redirect}`, query: query, replaceState: true });
