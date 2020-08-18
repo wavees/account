@@ -251,10 +251,18 @@
 
   // Function, that'll handle correct url
   // changing process.
-  function urlChange(url, newQuery, replaceState = false) {
+  function urlChange(url, newQuery, replaceState = false, encode = false) {
     let query = newQuery;
     if (query == null) {
       query = new URLSearchParams(window.location.search);
+    };
+
+    if (encode) {
+      url = encodeURIComponent(url);
+    };
+
+    if (url.includes("authorize")) {
+      url = url.replace("authorize%2F", "authorize/")
     };
 
     goto(`${url}?${query}`, replaceState);
@@ -429,7 +437,7 @@
           on:check={(e) => check(e.detail) } 
           on:providerChange={(e) => changeProvider(e.detail)}
           on:callback={(e) => callback(e.detail)}
-          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query, e.detail.replaceState)}
+          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query, e.detail.replaceState, e.detail.encode)}
           on:redirect={() => redirect()}
           on:loaded={(e) => { tileLoaded = e.detail; }}
           on:step={(e) => { step = e.detail }}
@@ -446,7 +454,7 @@
           on:check={(e) => check(e.detail)}
           on:providerChange={(e) => changeProvider(e.detail)} 
           on:callback={(e) => callback(e.detail)}
-          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query, e.detail.replaceState)}
+          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query, e.detail.replaceState, e.detail.encode)}
           on:redirect={() => redirect()}
           on:loaded={(e) => { tileLoaded = e.detail; }}
           on:step={(e) => { step = e.detail }}
@@ -463,7 +471,7 @@
           on:check={(e) => check(e.detail)}
           on:providerChange={(e) => changeProvider(e.detail)} 
           on:callback={(e) => callback(e.detail)}
-          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query, e.detail.replaceState)}
+          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query, e.detail.replaceState, e.detail.encode)}
           on:redirect={() => redirect()}
           on:loaded={(e) => { tileLoaded = e.detail; }}
           on:step={(e) => { step = e.detail }}

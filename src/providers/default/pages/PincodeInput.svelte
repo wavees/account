@@ -105,16 +105,12 @@
           let query = new URLSearchParams(window.location.search);
           query.delete("providerId");
 
-          let redirect = encodeURIComponent($page.query.return);
+          let redirect = $page.query.return;
           if (redirect == null) {
-            redirect = `/authorize/${$page.params.id}`;
+            redirect = `authorize/${$page.params.id}`;
           };
 
-          if (redirect.includes("authorize")) {
-            redirect = redirect.replace("authorize%2F", "authorize/")
-          };
-
-          dispatch("urlChange", { url: `${redirect}`, query: query, replaceState: true });
+          dispatch("urlChange", { url: `${redirect}`, query: query, replaceState: true, encode: true });
 
           // And now we need to call check
           // function.
