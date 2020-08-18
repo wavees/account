@@ -10,6 +10,8 @@
   import { fade } from "svelte/transition";
   import { stores } from "@sapper/app";
 
+  import { user } from "../../../config/stores/user.js";
+
   // Let's get page store
   const { page } = stores();
 
@@ -88,14 +90,33 @@
             expires: moment().add('1', 'year').toDate()
           });
           
-          cookies.set('_logged_in', true, {
-            path: "/",
-            expires: moment().add('5', "seconds").toDate()
-          });
+          // cookies.set('_logged_in', true, {
+          //   path: "/",
+          //   expires: moment().add('5', "seconds").toDate()
+          // });
           // And let's delete _login_email cookie
           cookies.remove('_login_email');
 
-          dispatch("check");
+          // By the way, we need to update
+          // our user store.
+          user.setToken(response.token);
+
+          user.setToken(response.token);
+          let query = new URLSearchParams(window.location.search);
+          query.delete("providerId");
+
+          let redirect = $page.query.return;
+          if (redirect == null) {
+            redirect = `/authorize/${$page.params.id}`;
+          };
+
+          dispatch("urlChange", { url: `${redirect}`, query: query, replaceState: true });
+
+          // And now we need to call check
+          // function.
+          setTimeout(() => {
+            dispatch("check");
+          }, 150);
         } else {
           loading = false;
           dispatch("error", "authorization.errors.invalidPincode");

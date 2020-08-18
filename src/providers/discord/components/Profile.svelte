@@ -21,7 +21,7 @@
 
 <!-- Component Style -->
 
-<div transition:slide class="px-6 py-4 w-full flex justify-between">
+<div in:slide class="px-6 py-4 w-full flex justify-between">
   <div class="flex items-center">
     <div class="relative">
       <Avatar type="image" size="2.5" avatar="{user.avatar}" />

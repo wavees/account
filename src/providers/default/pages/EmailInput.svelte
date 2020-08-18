@@ -4,6 +4,7 @@
 
   import { onMount } from 'svelte';
 
+  import { user } from "../../../config/stores/user.js";
   import { stores } from "@sapper/app";
   // Page store
   const { page } = stores();
@@ -193,6 +194,10 @@
             };
 
             dispatch("urlChange", { url: uri, query: query });
+
+            setTimeout(() => {
+              dispatch("check", "accounts");
+            }, 150);
           }} class="h-8 w-full text-center flex justify-center items-center">
             {#if backButtonLoading}
               <Spinner size="12" />

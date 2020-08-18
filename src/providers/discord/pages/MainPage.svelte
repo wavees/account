@@ -3,6 +3,7 @@
   import axios from "axios";
   import { onMount } from "svelte";
 
+  import { user } from "../../../config/stores/user.js";
   import { goto } from "@sapper/app";
 
   // Event Dispatcher
@@ -99,8 +100,23 @@
               });
               // And let's delete _login_email cookie
               cookies.remove('_login_email');
+              // Now we need to update our user store.
+              user.setToken(response.token);
+              let query = new URLSearchParams(window.location.search);
+              query.delete("providerId");
 
-              dispatch("callback");
+              let redirect = $page.query.return;
+              if (redirect == null) {
+                redirect = `/authorize/${$page.params.id}`;
+              };
+
+              dispatch("urlChange", { url: `${redirect}`, query: query, replaceState: true });
+
+              // And now we need to call check
+              // function.
+              setTimeout(() => {
+                dispatch("check");
+              }, 150);
             } else {
               loading = false;
               dispatch("error", "authorization.errors.invalidPincode");

@@ -24,23 +24,28 @@ const check = () => {
     // 
     page.subscribe((object) => {
       const id = object.params.id;
-      
+
       console.log("SUBSCRIBED");
       // Let's firstly get user's current
       // token and page id.
       let token;
+      console.log(id);
+
       if (id != "add") {
         token = cookies.get("_account_token", { path: "/" });
       } else {
-        if (cookies.get("_logged_in", { path: "/" })) {
+        if (cookies.get("_logged_in", { path: "/" }) == true) {
           // Let's just redirect our user to
           // needed url.
-          cookies.remove("_logged_in");
+          cookies.remove("_logged_in", { path: "/" });
           resolve("callback");
 
           return;
         };
       };
+
+      console.log("TOKEN:");
+      console.log(token);
 
       let email = cookies.get("_login_email", { path: "/" });
       
@@ -51,6 +56,7 @@ const check = () => {
       axios.get(`${api.url}/${api.version}/account/${token}`)
       .then((response) => {
         let data = response.data;
+        console.log(data);
         console.log("CALLBACK");
 
         // Okay, so our user is logged in.

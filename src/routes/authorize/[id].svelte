@@ -136,37 +136,38 @@
 
   // Small function, that'll
   // check our current state.
-  function check() {
+  function check(type) {
     // And now we need to check
     // a lot of different things...
 
     // Variable (Action Type) to determine
     // our next steps (Show Accounts page or
     // check for provider)
-    let type = "provider";
-
-    if ($page.params.id == "login") {
-      type = "provider";
-    } else {
-      if ($page.params.id == "add") {
+    
+    if (type != "provider" && type != "add" && type != "accounts") {
+      if ($page.params.id == "login") {
         type = "provider";
       } else {
-        if ($page.query.providerId == null) {
-          if ($user.tokens.length >= 1) {
-            // So now let's show all user
-            // accounts ane etc.
-            type = "accounts";
-          } else {
-            // And now we need just to proceed
-            // with our current provider.
-            type = "provider";
-          }
-        } else {
-          // We don't even need
-          // to check for user accounts,
-          // let's just proceed with our
-          // provider.
+        if ($page.params.id == "add") {
           type = "provider";
+        } else {
+          if ($page.query.providerId == null) {
+            if ($user.tokens.length >= 1) {
+              // So now let's show all user
+              // accounts ane etc.
+              type = "accounts";
+            } else {
+              // And now we need just to proceed
+              // with our current provider.
+              type = "provider";
+            }
+          } else {
+            // We don't even need
+            // to check for user accounts,
+            // let's just proceed with our
+            // provider.
+            type = "provider";
+          };
         };
       };
     };
@@ -250,13 +251,13 @@
 
   // Function, that'll handle correct url
   // changing process.
-  function urlChange(url, newQuery) {
+  function urlChange(url, newQuery, replaceState = false) {
     let query = newQuery;
     if (query == null) {
       query = new URLSearchParams(window.location.search);
     };
 
-    goto(`${url}?${query}`);
+    goto(`${url}?${query}`, replaceState);
   };
 </script>
 
@@ -401,7 +402,11 @@
                   let query = new URLSearchParams(window.location.search);
                   query.set("return", `authorize/${$page.params.id}`);
 
-                  urlChange("/authorize/add", query);
+                  urlChange("/authorize/add", query, true);
+
+                  setTimeout(() => {
+                    check("provider");
+                  }, 150);
                 }} margin="py-0">
                   {#if buttonLoading}
                     <Spinner size="12" color="#fff" />
@@ -421,12 +426,13 @@
       { :else if step == "identity" }
         <svelte:component this={provider.pages.identity} 
           on:error={(e) => error = e.detail}
-          on:check={() => check() } 
+          on:check={(e) => check(e.detail) } 
           on:providerChange={(e) => changeProvider(e.detail)}
           on:callback={(e) => callback(e.detail)}
-          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query)}
+          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query, e.detail.replaceState)}
           on:redirect={() => redirect()}
           on:loaded={(e) => { tileLoaded = e.detail; }}
+          on:step={(e) => { step = e.detail }}
         />
       <!-- 
         @step Authorization
@@ -437,12 +443,13 @@
       { :else if step == "authorization" }
         <svelte:component this={provider.pages.authorization}
           on:error={(e) => error = e.detail}
-          on:check={() => check()}
+          on:check={(e) => check(e.detail)}
           on:providerChange={(e) => changeProvider(e.detail)} 
           on:callback={(e) => callback(e.detail)}
-          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query)}
+          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query, e.detail.replaceState)}
           on:redirect={() => redirect()}
           on:loaded={(e) => { tileLoaded = e.detail; }}
+          on:step={(e) => { step = e.detail }}
         />
       <!-- 
         @step Account Creation
@@ -453,12 +460,13 @@
       { :else if step == "create" }
         <svelte:component this={provider.pages.create}
           on:error={(e) => error = e.detail}
-          on:check={() => check()}
+          on:check={(e) => check(e.detail)}
           on:providerChange={(e) => changeProvider(e.detail)} 
           on:callback={(e) => callback(e.detail)}
-          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query)}
+          on:urlChange={(e) => urlChange(e.detail.url, e.detail.query, e.detail.replaceState)}
           on:redirect={() => redirect()}
           on:loaded={(e) => { tileLoaded = e.detail; }}
+          on:step={(e) => { step = e.detail }}
         />
       {/if}
     </div>
